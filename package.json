@@ -1,0 +1,22 @@
+{
+  "name": "franklin-cms",
+  "version": "0.1.0",
+  "description": "A node-based CMS built from scratch to meet the goals of security, stability, and efficiency.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "nodemon server.js"
+  },
+  "author": "Matthew Hall",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^2.5.6",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "mongodb": "^2.2.28",
+    "mongoose": "4.1.9"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
