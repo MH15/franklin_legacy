@@ -58,10 +58,10 @@ app.post('/saveuseredits', (req, res) => {
 			res.send('MongoDB success')
 			console.log("doc exists")
 			collection.update({franklinID: currentID}, newValues, function(err, res) {
-    			if (err) throw err;
-    			console.log(res.result.nModified + " record updated");
-    			// db.close();
-  			});
+				if (err) throw err;
+				console.log(res.result.nModified + " record updated");
+				// db.close();
+			});
 
 		} else {
 			res.send('MongoDB failure')
@@ -96,11 +96,16 @@ app.get('/', (req, res) => {
 	// make sure to sort content by franklinID before passing
 	// to ejs to avoid mangling the result orders
 	db.collection('page_content').find().sort({franklinID: 1}).toArray(function(err, result) {
-    	if (err) throw err;
-    	console.log(result);
-    	res.render('app.ejs', {ejsData: result})
-    	// db.close();
-  	})
+		if (err) throw err;
+		// console.log(result);
+		var sortedData = {
+
+		}
+		
+
+		res.render('app.ejs', {ejsData: result})
+		// db.close();
+	})
 })
 
 

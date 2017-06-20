@@ -3,7 +3,8 @@
 
 Window.FRANKLIN = {
 	STRINGS: {
-		CONTENT_EDITABLE: "editable"
+		CONTENT_EDITABLE: "editable",
+		FranklinZone: "editable-zone"
 	},
 	SECURITY: {
 		SECURED: true

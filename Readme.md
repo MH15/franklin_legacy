@@ -16,6 +16,22 @@ This all needs to be done in order of importance:
 3. General UI
 4. Multiple Users / Revision history
 
+## Data Format
+This is what each data entry in MongoDB should be formatted as:
+```javascript
+{
+    "_id": {
+        "$oid": <generic-mongodb-id>
+    },
+    "zoneName": "one",
+    "franklinID": "1",
+    "content": "b",
+    "timeStamp": 1497748229443,
+    "user": "Steve"
+}
+```
+
+
 
 ## References
 ### Express
