@@ -15,65 +15,43 @@ var ZoneInformation = {
 
 // add edit buttons if logged in
 if (lock.SECURED == true) {
-	console.log(EditableZones)
 	FindEditableContent()
 }
 
 
 function FindEditableContent() {
-	var transferElements
+
 	// in each user-defined edit zone, number editable areas
 	// increasing from 0. FranklinID's are unique to each zone
 	// but not to the entire page. This way, we need both a
 	// FranklinID and a zone-name to publish edited content
-	for (var i = 0; i < EditableZones.length; i++) {
-		// do this for each zone
-		ZoneInformation[i] = EditableZones[i]
-		ZoneInformation[i].info = {
-			name: EditableZones[i].getAttribute("zone-name")
-		}
 
-		for (var i = 0; i < FranklinElements.length; i++) {
-			FranklinElements[i].setAttribute("franklin-id", i)
-			FranklinElements[i].addEventListener ("click", function(d) {
-				BeginEditLoop(this.getAttribute("franklin-id"))
+
+	EditableZones.forEach(zone => {
+		zone.name = zone.getAttribute("zone-name")
+		var currentShell = document.querySelector(`[zone-name="${(zone.name).toString()}"]`)
+		zone.editableContent = []		
+		var innerDoc = currentShell.querySelectorAll(`[franklin-state="${str.CONTENT_EDITABLE}"]`)
+
+		for (var i = 0; i < innerDoc.length; i++) {
+			innerDoc[i].setAttribute("franklin-id", i)
+			innerDoc[i].setAttribute("d-id", i)
+			innerDoc[i].addEventListener ("click", function(d) {
+				BeginEditLoop(zone, this.getAttribute("franklin-id"))
 			})
+			zone.editableContent[i] = innerDoc[i]
 
 		}
-	}
-	console.log(ZoneInformation[0].info)
+	})
 
 	
 }
 
 
-// function FindEditableContent() {
-// 	var transferElements
-// 	// in each user-defined edit zone, number editable areas
-// 	// increasing from 0. FranklinID's are unique to each zone
-// 	// but not to the entire page. This way, we need both a
-// 	// FranklinID and a zone-name to publish edited content
-// 	for (var i = 0; i < EditableZones.length; i++) {
-// 		// do this for each zone
-// 		ZoneInformation[i] = EditableZones[i]
-// 		ZoneInformation[i].info = {
-// 			name: EditableZones[i].getAttribute("zone-name")
-// 		}
 
-// 	}
-// 	console.log(ZoneInformation[0].info)
-
-// 	for (var i = 0; i < FranklinElements.length; i++) {
-// 		FranklinElements[i].setAttribute("franklin-id", i)
-// 		FranklinElements[i].addEventListener ("click", function(d) {
-// 			BeginEditLoop(this.getAttribute("franklin-id"))
-// 		})
-
-// 	}
-// }
-
-function BeginEditLoop(franklinID) {
-	var editableUnit = FranklinElements[franklinID]
+function BeginEditLoop(zone, franklinID) {
+	console.log(`zone: ${zone.name}, franklinID: ${franklinID}`)
+	var editableUnit = zone.editableContent[franklinID]
 	var editableUnitText = editableUnit.innerText
 	// console.log(`button with franklin-id ${franklinID} of clicked`)
 	// console.log(editableUnitText)
@@ -95,13 +73,14 @@ function BeginEditLoop(franklinID) {
 		editedUnit.innerText = textEditor.value
 		parentUnit.replaceChild(editedUnit, textEditor)
 		// sync with server
-		SaveUserEdits(franklinID)
+		SaveUserEdits(zone, franklinID)
 	})
 }
 
-function SaveUserEdits(franklinID) {
-	var updatedContent = FranklinElements[franklinID].innerText
+function SaveUserEdits(zone, franklinID) {
+	var updatedContent = zone.editableContent[franklinID].innerText
 	var dataToSend = {
+		zone: zone.name,
 		franklinID: franklinID,
 		content: updatedContent,
 		timeStamp: new Date().getTime(),

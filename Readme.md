@@ -23,7 +23,7 @@ This is what each data entry in MongoDB should be formatted as:
     "_id": {
         "$oid": <generic-mongodb-id>
     },
-    "zoneName": "one",
+	"zone": "zone",
     "franklinID": "1",
     "content": "b",
     "timeStamp": 1497748229443,
@@ -44,4 +44,6 @@ https://www.w3schools.com/nodejs/nodejs_mongodb_query.asp
 https://mongodb.github.io/node-mongodb-native/markdown-docs/queries.html
 https://stackoverflow.com/questions/8694346/check-for-existing-document-in-mongo
 
-
+### Git
+https://www.git-tower.com/blog/git-cheat-sheet/
+https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet

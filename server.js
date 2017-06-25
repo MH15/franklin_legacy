@@ -2,6 +2,8 @@ var express = require('express')
 var bodyParser = require('body-parser')
 var app = express()
 var MongoClient = require('mongodb').MongoClient
+var ObjectID = require('mongodb').ObjectID,
+    assert = require('assert');
 
 // edit express configuration
 app.use(bodyParser.urlencoded({extended: true}))
@@ -27,7 +29,7 @@ app.post('/edit', (req, res) => {
 	db.collection('data').save(req.body, (err, result) => {
 		if (err) return console.log(err)
 
-		console.log('saved to database')
+		// console.log('saved to database')
 		res.redirect('/')
 	})
 })
@@ -35,43 +37,39 @@ app.post('/edit', (req, res) => {
 app.post('/saveuseredits', (req, res) => {
 	var collection = db.collection('page_content')
 	var currentID = req.body.franklinID
-	console.log(currentID)
+	var currentZone = req.body.zone
+	// console.log(req.body)
 
 	var newValues = {
+		zone: req.body.zone,
 		franklinID: req.body.franklinID,
 		content: req.body.content,
 		timeStamp: new Date().getTime(),
 		user: "Steve"
 	}
 
-	// collection.find(query).toArray(function(err, result) {
-	// if (err) throw err;
-	// 	console.log(result);
-	// 	// db.close();
-	// })
 
 	// check if document already exists
 	// if so, edit document
 	// if not, create document
-	collection.findOne({franklinID: currentID}, function(err, document) {
+	collection.findOne({zone: currentZone, franklinID: currentID}, function(err, document) {
 		if (document) {
 			res.send('MongoDB success')
-			console.log("doc exists")
-			collection.update({franklinID: currentID}, newValues, function(err, res) {
+			console.log('MongoDB success')
+			collection.update({zone: currentZone, franklinID: currentID}, newValues, function(err, res) {
 				if (err) throw err;
-				console.log(res.result.nModified + " record updated");
+				// console.log(res.result.nModified + " record updated");
 				// db.close();
 			});
 
 		} else {
 			res.send('MongoDB failure')
-			console.log("doc doesn't exist") 
-			// save new document
-			// collection.save(req.body, (err, result) => {
-			// 	if (err) return console.log(err)
-			// 	console.log('saved to database')
-			// 	// res.redirect('/')
-			// })
+			console.log("Adding new doc")
+
+			var document = newValues
+			collection.insertOne(document, function(err, records){
+  				console.log("Record added");
+			})
 		} 
 
 
@@ -80,47 +78,87 @@ app.post('/saveuseredits', (req, res) => {
 	
 })
 
+
+function UpdatePageContent(data) {
+	var numZones = data.length
+	var ouputObject = {
+		/* structure should be like so:
+		zoneNameOne: {
+			content: <etc>
+		},
+		zoneNameTwo: {
+			content: <etc>
+		}
+		*/
+	}
+	for (var i = 0; i < numZones; i++) {
+		var subObjectName = data[i][0].zone
+		ouputObject[subObjectName] = []
+		for (var y = 0; y < data[i].length; y++) {
+			ouputObject[subObjectName][y] = data[i][y]
+			// console.log("data[i][y]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+			// console.log(data[i][y])
+		}
+	}
+
+	return ouputObject
+}
+
+
 app.get('/', (req, res) => {
 	// db.collection('data').find().toArray((err, result) => {
 	// 	if (err) return console.log(err)
 	// 	// renders index.ejs
 	// 	res.render('index.ejs', {data: result})
 	// })
-	db.collection('page_content').find().toArray((err, result) => {
-		if (err) return console.log(err)
-		// renders index.ejs
-		// res.render('index.ejs', {ejsData: result})
-		
-		// console.log(result)
-	})
+	collection = db.collection('page_content')
+
 	// make sure to sort content by franklinID before passing
 	// to ejs to avoid mangling the result orders
-	db.collection('page_content').find().sort({franklinID: 1}).toArray(function(err, result) {
-		if (err) throw err;
-		// console.log(result);
-		var sortedData = {
+	collection.distinct("zone",(function(err, result) {
+		var distinctZones = result
 
-		}
-		
+		var promises = distinctZones.map(function(name) {
+			return new Promise(function(resolve, reject) {
+				// find each of the distinct tags
+				// MongoDB find([name]) of type Array returns array of each query
 
-		res.render('app.ejs', {ejsData: result})
-		// db.close();
-	})
+				collection.find({zone: name}).sort({franklinID: 1}).toArray(function(err, result) {
+					if (true) {
+    					resolve(result)
+    					// console.log(result)
+  					}
+  					else {
+    					reject(Error(err));
+  					}
+				})
+
+				
+			})
+		})
+		// run all find commands asynchronously
+		Promise.all(promises)
+		.then(function(result) {
+			// send to parser and render EJS
+			var output = UpdatePageContent(result)
+			res.render('app.ejs', {output: output})
+
+		}, function(err) {
+  			console.log(err)
+		})
+		.catch(console.error)
+   }))
+
+
+
+	// collection.find({zone: "one"}).sort({franklinID: 1}).toArray(function(err, result) {
+	// 	if (err) throw err;
+	// 	// console.log(result);
+
+	// 	res.render('app.ejs', {ejsData: result})
+	// 	// db.close();
+	// })
+
+	// console.log(new ObjectID())
 })
 
-
-// app.put('/edit', (req, res) => {
-// 	db.collection('data')
-// 	.findOneAndUpdate({title: 'alpha'}, {
-// 		$set: {
-// 			name: req.body.title,
-// 			quote: req.body.content
-// 		}
-// 	}, {
-// 		sort: {_id: -1},
-// 		upsert: true
-// 	}, (err, result) => {
-// 		if (err) return res.send(err)
-// 		res.send(result)
-// 	})
-// })

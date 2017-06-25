@@ -20,9 +20,9 @@
 <section franklin-state="editable-zone" zone-name="one">
 	<!-- insert all items from database here -->
 	<ul>
-		<% for(var i=0; i< ejsData.length; i++) {%>
+		<% for(var i=0; i< output.one.length; i++) {%>
 			<li franklin-state="editable" class="content">
-				<span><%= ejsData[i].content %></span>
+				<span><%= output.one[i].content %></span>
 			</li>
 		<% } %>
 	</ul>
@@ -33,9 +33,9 @@
 <section franklin-state="editable-zone" zone-name="two">
 	<!-- insert all items from database here -->
 	<ul>
-		<% for(var i=0; i< ejsData.length; i++) {%>
+		<% for(var i=0; i< output.two.length; i++) {%>
 			<li franklin-state="editable" class="content">
-				<span><%= ejsData[i].content %></span>
+				<span><%= output.two[i].content %></span>
 			</li>
 		<% } %>
 	</ul>
