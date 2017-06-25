@@ -1,4 +1,4 @@
-// client side code for Franklin
+// client side code for Franklin Editor
 // as much functionality as possible 
 // should be implemented here
 str = Window.FRANKLIN.STRINGS

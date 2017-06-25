@@ -1,6 +1,10 @@
 __**Important:** will publish open source to Github as soon as well documented__
 # Franklin
-Franklin is a new node-based Content Management System (CMS) built from scratch to meet the goals of security, stability, and efficiency.
+Franklin is a new node-based Content Management System (CMS) built from scratch to meet the goals of security, stability, and efficiency. Franklin uses a stack based on Node/Express including
+- Passport.js
+- EJS
+- MongoDB
+- Some other things
 
 
 ## Installation

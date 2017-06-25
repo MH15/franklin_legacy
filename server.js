@@ -1,14 +1,25 @@
-var express = require('express')
-var bodyParser = require('body-parser')
-var app = express()
-var MongoClient = require('mongodb').MongoClient
-var ObjectID = require('mongodb').ObjectID,
-    assert = require('assert');
+var express = require('express'),
+	bodyParser = require('body-parser'),
+	app = express(),
+	MongoClient = require('mongodb').MongoClient,
+	ObjectID = require('mongodb').ObjectID,
+	assert = require('assert'),
+	passport = require('passport'),
+	LocalStrategy = require('passport-local').Strategy,
+	session = require('express-session');
+
+
 
 // edit express configuration
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static('public'))
+// passport login
+// required for passport session
+app.use(session({secret: "enter custom sessions secret here"}));
+app.use(passport.initialize()) // Init passport authentication 
+app.use(passport.session()) // persistent login sessions 
+// view engine
 app.set('view engine', 'ejs')
 
 // init MongoDB
@@ -24,16 +35,24 @@ MongoClient.connect('mongodb://MH15:MHall123@ds161901.mlab.com:61901/franklin-db
 	})
 })
 
+// login & security
+passport.use(new LocalStrategy(
+	function(username, password, done) {
+		User.findOne({ username: username }, function(err, user) {
+			if (err) { return done(err); }
+			if (!user) {
+				return done(null, false, { message: 'Incorrect username.' });
+			}
+			if (!user.validPassword(password)) {
+				return done(null, false, { message: 'Incorrect password.' });
+			}
+			return done(null, user);
+		});
+	}
+));
 
-app.post('/edit', (req, res) => {
-	db.collection('data').save(req.body, (err, result) => {
-		if (err) return console.log(err)
 
-		// console.log('saved to database')
-		res.redirect('/')
-	})
-})
-
+// main stuff
 app.post('/saveuseredits', (req, res) => {
 	var collection = db.collection('page_content')
 	var currentID = req.body.franklinID
@@ -48,7 +67,6 @@ app.post('/saveuseredits', (req, res) => {
 		user: "Steve"
 	}
 
-
 	// check if document already exists
 	// if so, edit document
 	// if not, create document
@@ -58,8 +76,6 @@ app.post('/saveuseredits', (req, res) => {
 			console.log('MongoDB success')
 			collection.update({zone: currentZone, franklinID: currentID}, newValues, function(err, res) {
 				if (err) throw err;
-				// console.log(res.result.nModified + " record updated");
-				// db.close();
 			});
 
 		} else {
@@ -68,49 +84,86 @@ app.post('/saveuseredits', (req, res) => {
 
 			var document = newValues
 			collection.insertOne(document, function(err, records){
-  				console.log("Record added");
+					console.log("Record added");
 			})
 		} 
-
-
 	})
-
-	
 })
-
 
 function UpdatePageContent(data) {
 	var numZones = data.length
-	var ouputObject = {
-		/* structure should be like so:
-		zoneNameOne: {
-			content: <etc>
-		},
-		zoneNameTwo: {
-			content: <etc>
-		}
-		*/
-	}
+	var ouputObject = { }
 	for (var i = 0; i < numZones; i++) {
 		var subObjectName = data[i][0].zone
 		ouputObject[subObjectName] = []
 		for (var y = 0; y < data[i].length; y++) {
 			ouputObject[subObjectName][y] = data[i][y]
-			// console.log("data[i][y]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-			// console.log(data[i][y])
 		}
 	}
-
 	return ouputObject
 }
 
-
 app.get('/', (req, res) => {
-	// db.collection('data').find().toArray((err, result) => {
-	// 	if (err) return console.log(err)
-	// 	// renders index.ejs
-	// 	res.render('index.ejs', {data: result})
-	// })
+	RunSite('app.ejs', req, res)
+})
+
+
+app.get('/login', function(req, res) {
+	res.render('login.ejs', {output: null})
+})
+
+app.post('/login',
+	passport.authenticate('local', {
+		// if login successful route to edit page
+		// which is really just a duplicate of the
+		// app.ejs file TODO: remove editing capability
+		// on the regular view
+		successRedirect: '/edit',
+		failureRedirect: '/loginFailure'
+	})
+);
+
+passport.serializeUser(function(user, done) {
+	done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+	done(null, user);
+});
+
+app.get('/loginFailure', function(req, res, next) {
+	res.send('Failed to authenticate');
+});
+
+// route to editor if logged in
+app.get('/edit', ensureAuthenticated, function(req, res, next) {
+	RunSite('edit.ejs', req, res)
+});
+
+passport.use(new LocalStrategy(function(username, password, done) {
+	process.nextTick(function() {
+		console.log("working")
+		db.collection('credentials').findOne({
+			'username': username, 
+		}, function(err, user) {
+			if (err) {
+				return done(err);
+			}
+
+			if (!user) {
+				return done(null, false);
+			}
+
+			if (user.password != password) {
+				return done(null, false);
+			}
+
+			return done(null, user);
+		});
+	});
+}));
+
+function RunSite(source, req, res) {
 	collection = db.collection('page_content')
 
 	// make sure to sort content by franklinID before passing
@@ -125,15 +178,13 @@ app.get('/', (req, res) => {
 
 				collection.find({zone: name}).sort({franklinID: 1}).toArray(function(err, result) {
 					if (true) {
-    					resolve(result)
-    					// console.log(result)
-  					}
-  					else {
-    					reject(Error(err));
-  					}
+							resolve(result)
+							// console.log(result)
+						}
+						else {
+							reject(Error(err));
+						}
 				})
-
-				
 			})
 		})
 		// run all find commands asynchronously
@@ -141,24 +192,34 @@ app.get('/', (req, res) => {
 		.then(function(result) {
 			// send to parser and render EJS
 			var output = UpdatePageContent(result)
-			res.render('app.ejs', {output: output})
+			res.render(source, {output: output})
 
 		}, function(err) {
-  			console.log(err)
+				console.log(err)
 		})
 		.catch(console.error)
-   }))
-
-
-
-	// collection.find({zone: "one"}).sort({franklinID: 1}).toArray(function(err, result) {
-	// 	if (err) throw err;
-	// 	// console.log(result);
-
-	// 	res.render('app.ejs', {ejsData: result})
-	// 	// db.close();
-	// })
+	 }))
 
 	// console.log(new ObjectID())
-})
+}
 
+// Simple route middleware to ensure user is authenticated.
+//  Use this route middleware on any resource that needs to be protected.  If
+//  the request is authenticated (typically via a persistent login session),
+//  the request will proceed.  Otherwise, the user will be redirected to the
+//  login page.
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
+
+app.get('/protected', ensureAuthenticated, function(req, res) {
+  res.send("acess granted");
+});
+
+// simply to logout users
+app.get('/logout', function(req, res){
+  console.log('logging out');
+  req.logout();
+  res.redirect('/');
+});
