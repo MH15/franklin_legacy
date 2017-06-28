@@ -89,7 +89,7 @@ app.post('/saveuseredits', (req, res) => {
 		} 
 	})
 })
-
+// clean up MongoDB data
 function UpdatePageContent(data) {
 	var numZones = data.length
 	var ouputObject = { }
@@ -136,7 +136,10 @@ app.get('/loginFailure', function(req, res, next) {
 });
 
 // route to editor if logged in
-app.get('/edit', ensureAuthenticated, function(req, res, next) {
+// app.get('/edit', ensureAuthenticated, function(req, res, next) {
+// 	RunSite('edit.ejs', req, res)
+// });
+app.get('/edit', function(req, res, next) {
 	RunSite('edit.ejs', req, res)
 });
 
