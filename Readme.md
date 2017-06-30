@@ -16,7 +16,7 @@ Run `npm run serve` to watch and serve any changes with a `nodemon` instance.
 ## TODO:
 This all needs to be done in order of importance:
 1. ~~Support multiple editing spaces~~
-2. Login system
+2. ~~Login system~~
 3. Add New Item function 
 4. General UI
 5. Multiple Users / Revision history

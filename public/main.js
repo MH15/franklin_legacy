@@ -65,12 +65,51 @@ function AddFranklinItem(parentZone) {
 	postButton.appendAfter(newTextBox)
 	postButton.addEventListener ("click", function(d) {
 		// TODO: save to server
-		// PostNewFranklinItem(parentZone, newTextBox.innerText)
-		console.log(`zone: ${parentZone.name}, text: ${newTextBox.value}`)
+		PostNewFranklinItem(parentZone, newTextBox.value)
+		// console.log(`zone: ${parentZone.name}, text: ${newTextBox.value}`)
 		newButton.style.display = "block"
 		postButton.style.display = "none"
 		newTextBox.style.display = "none"
 	})
+
+}
+
+function PostNewFranklinItem(zone, text) {
+	var dataToSend = {
+		zone: zone.name,
+		franklinID: (zone.editableContent.length).toString(),
+		content: text,
+		timeStamp: new Date().getTime(),
+		user: "Steve"
+	}
+
+	var request = new Request('/additem', {
+		method: 'POST',
+		body: JSON.stringify(dataToSend),
+		mode: 'cors', 
+		redirect: 'follow',
+		headers: new Headers({
+			'Content-Type': 'application/JSON'
+		})
+	})
+
+	// Now use it!
+	fetch(request)
+	.then(function(response) {
+    	return response.text();
+  	}).then(function(text) { 
+  	// <!DOCTYPE ....
+  		console.log(text); 
+  	})
+	.catch(function(err) {  
+		console.log('Fetch Error :-S', err)
+	})
+
+	// .then(response => {
+	// 	return response.text
+	// }).then(text => {
+	// 	console.log(text)
+	// })
 
 }
 
@@ -113,25 +152,27 @@ function SaveUserEdits(zone, franklinID) {
 		timeStamp: new Date().getTime(),
 		user: "Steve"
 	}
-	// console.log(dataToSend)
-
-	var httpRequest = new XMLHttpRequest();
-
    // TODO: StartLoadingIndicatior()
-	httpRequest.onreadystatechange = function() {
-		if (httpRequest.readyState === XMLHttpRequest.DONE) {
-			if (httpRequest.status === 200) {
-				console.log(httpRequest.responseText)
-   		} else {
-        		console.log('There was a problem with the request.')
-        		// TODO: StopLoadingIndicatior()
-      	}
-		} else {
-			// Not ready yet.
-		}
-	}
+	var request = new Request('/saveuseredits', {
+		method: 'POST',
+		body: JSON.stringify(dataToSend),
+		mode: 'cors', 
+		redirect: 'follow',
+		headers: new Headers({
+			'Content-Type': 'application/JSON'
+		})
+	})
 
-	httpRequest.open('POST', '/saveuseredits', true)
-	httpRequest.setRequestHeader('Content-Type', 'application/json')
-	httpRequest.send(JSON.stringify(dataToSend))
+	// Now use it!
+	fetch(request)
+	.then(function(response) {
+    	return response.text();
+  	}).then(function(text) { 
+  	// <!DOCTYPE ....
+  		console.log(text); 
+  	})
+	.catch(function(err) {  
+		console.log('Fetch Error :-S', err)
+	})
+
 }

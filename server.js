@@ -51,13 +51,24 @@ passport.use(new LocalStrategy(
 	}
 ));
 
+// add a new item to the database
+app.post('/additem', (req, res) => {
+	var collection = db.collection('page_content')
+	var document = req.body
+	console.log(req.body);
+	collection.insertOne(document, function(err, records){
+		console.log("Record added");
+	})
+	res.send('Add Item Success')
+	// TODO: save to db
+})
 
 // main stuff
 app.post('/saveuseredits', (req, res) => {
 	var collection = db.collection('page_content')
 	var currentID = req.body.franklinID
 	var currentZone = req.body.zone
-	// console.log(req.body)
+	console.log(req.body)
 
 	var newValues = {
 		zone: req.body.zone,
@@ -195,6 +206,7 @@ function RunSite(source, req, res) {
 		.then(function(result) {
 			// send to parser and render EJS
 			var output = UpdatePageContent(result)
+			console.log(output)
 			res.render(source, {output: output})
 
 		}, function(err) {
