@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Edit | Franklin</title>
+	<title><%= pageData.title %></title>
 
 	<link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="normalize.css">
-	<link rel="stylesheet" type="text/css" href="main.css">
+	<link rel="stylesheet" type="text/css" href="css/style.min.css">
 </head>
 <body>
 
@@ -20,9 +20,9 @@
 <section franklin-state="editable-zone" zone-name="one">
 	<!-- insert all items from database here -->
 	<ul>
-		<% for(var i=0; i< output.one.length; i++) {%>
+		<% for(var i=0; i< dbContent.one.length; i++) {%>
 			<li franklin-state="editable" class="content">
-				<span><%= output.one[i].content %></span>
+				<span><%= dbContent.one[i].content %></span>
 			</li>
 		<% } %>
 	</ul>
@@ -33,13 +33,13 @@
 <section franklin-state="editable-zone" zone-name="two">
 	<!-- insert all items from database here -->
 	<ul>
-		<% for(var i=0; i< output.two.length; i++) {%>
+		<% for(var i=0; i< dbContent.two.length; i++) {%>
 			<li franklin-state="editable" class="content">
-				<span><%= output.two[i].content %></span>
+				<span><%= dbContent.two[i].content %></span>
 			</li>
 		<% } %>
 	</ul>
-</section>		
+</section>			
 
 
 
@@ -48,7 +48,7 @@
 
 
 <script src="franklin-lib.js"></script>
-<script src="main.js"></script>
+<script src="franklin-edit.js"></script>
 
 
 </body>

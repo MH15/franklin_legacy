@@ -1,3 +1,5 @@
+// server.js
+// ======
 var express = require('express'),
 	bodyParser = require('body-parser'),
 	app = express(),
@@ -6,27 +8,37 @@ var express = require('express'),
 	assert = require('assert'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local').Strategy,
-	session = require('express-session');
-
+	session = require('express-session'),
+	requireDir = require('require-dir')
 
 
 // edit express configuration
+
+
+// routing separation
+// app.use(require('./core/routes/auth'))
+// app.use(require('./core/routes/pages'))
+var routes = requireDir('./core/routes')
+for (var i in routes) app.use('/', routes[i])
+
+// view engine
+app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static('public'))
-// passport login
-// required for passport session
-app.use(session({secret: "enter custom sessions secret here"}));
-app.use(passport.initialize()) // Init passport authentication 
-app.use(passport.session()) // persistent login sessions 
-// view engine
-app.set('view engine', 'ejs')
+
+
+
 
 // init MongoDB
 // TODO: Adjust credentials
-var db
+// init MongoDB
+var db, username, password, collection
+username = "MH15"
+password = "MHall123"
+collection = "franklin-db"
 
-MongoClient.connect('mongodb://MH15:MHall123@ds161901.mlab.com:61901/franklin-db', (err, database) => {
+MongoClient.connect(`mongodb://${username}:${password}@ds161901.mlab.com:61901/${collection}`, (err, database) => {
 	if (err) return console.log(err)
 	db = database
 
@@ -113,10 +125,31 @@ function UpdatePageContent(data) {
 	}
 	return ouputObject
 }
+function DetermineFranklinStyle(franklinStyle) {
+	var style = null
+	switch (franklinStyle) {
+		case "edit":
+			style = "franklin-edit.js"
+			break;
+		case "view":
+			style = "franklin-view.js"
+			break;
+		default:
+			break;
+	}
+	return style
+}
 
 app.get('/', (req, res) => {
-	RunSite('app.ejs', req, res)
+	RunSite('template.ejs', "view", req, res)
 })
+// route to editor if logged in
+app.get('/edit', ensureAuthenticated, function(req, res, next) {
+	RunSite('edit.ejs', "edit", req, res)
+});
+// app.get('/edit', function(req, res, next) {
+// 	RunSite('edit.ejs', "edit", req, res)
+// });
 
 
 app.get('/login', function(req, res) {
@@ -127,12 +160,23 @@ app.post('/login',
 	passport.authenticate('local', {
 		// if login successful route to edit page
 		// which is really just a duplicate of the
-		// app.ejs file TODO: remove editing capability
-		// on the regular view
-		successRedirect: '/edit',
-		failureRedirect: '/loginFailure'
-	})
+		// template.ejs file
+		successRedirect: '/manage',
+		failureRedirect: '/login'
+	}), function (req, res) {
+		console.log(req.path);
+	}
+
+// 	})(req, res, next);
 );
+
+
+
+app.get('/manage', ensureAuthenticated, function(req, res) {
+	ManageSite('manage.ejs', req, res)
+});
+
+
 
 passport.serializeUser(function(user, done) {
 	done(null, user);
@@ -146,13 +190,7 @@ app.get('/loginFailure', function(req, res, next) {
 	res.send('Failed to authenticate');
 });
 
-// route to editor if logged in
-// app.get('/edit', ensureAuthenticated, function(req, res, next) {
-// 	RunSite('edit.ejs', req, res)
-// });
-app.get('/edit', function(req, res, next) {
-	RunSite('edit.ejs', req, res)
-});
+
 
 passport.use(new LocalStrategy(function(username, password, done) {
 	process.nextTick(function() {
@@ -177,7 +215,7 @@ passport.use(new LocalStrategy(function(username, password, done) {
 	});
 }));
 
-function RunSite(source, req, res) {
+function RunSite(source, franklinStyle, req, res) {
 	collection = db.collection('page_content')
 
 	// make sure to sort content by franklinID before passing
@@ -205,9 +243,19 @@ function RunSite(source, req, res) {
 		Promise.all(promises)
 		.then(function(result) {
 			// send to parser and render EJS
-			var output = UpdatePageContent(result)
-			console.log(output)
-			res.render(source, {output: output})
+			var dbContent = UpdatePageContent(result)
+			var pageData = {
+				title: source
+			}
+			var sources = {
+				franklinStyle: DetermineFranklinStyle(franklinStyle)
+			}
+			// console.log(dbContent)
+			res.render("template.ejs", {
+				pageData: pageData,
+				dbContent: dbContent,
+				sources: sources
+			})
 
 		}, function(err) {
 				console.log(err)
@@ -218,23 +266,27 @@ function RunSite(source, req, res) {
 	// console.log(new ObjectID())
 }
 
+function ManageSite(source, req, res) {
+	var pageData = {
+		title: source
+	}
+	res.render(source, {
+		pageData: pageData
+	})
+}
+
 // Simple route middleware to ensure user is authenticated.
 //  Use this route middleware on any resource that needs to be protected.  If
 //  the request is authenticated (typically via a persistent login session),
 //  the request will proceed.  Otherwise, the user will be redirected to the
 //  login page.
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+	if (req.isAuthenticated()) { return next(); }
+	// console.log(req.path);
+	res.redirect('/login')
 }
 
-app.get('/protected', ensureAuthenticated, function(req, res) {
-  res.send("acess granted");
-});
-
-// simply to logout users
-app.get('/logout', function(req, res){
-  console.log('logging out');
-  req.logout();
-  res.redirect('/');
+//The 404 Route (ALWAYS Keep this as the last route)
+app.get('*', function(req, res){
+	res.send('what???', 404);
 });

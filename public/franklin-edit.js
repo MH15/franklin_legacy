@@ -20,7 +20,7 @@ if (lock.SECURED == true) {
 
 function RunEditor() {
 	FindEditableContent()
-	// AddItemSetup()
+	// SetupEditor()
 }
 
 function FindEditableContent() {
@@ -64,9 +64,7 @@ function AddFranklinItem(parentZone) {
 	var postButton = CreateButton(str.submitPostText)
 	postButton.appendAfter(newTextBox)
 	postButton.addEventListener ("click", function(d) {
-		// TODO: save to server
 		PostNewFranklinItem(parentZone, newTextBox.value)
-		// console.log(`zone: ${parentZone.name}, text: ${newTextBox.value}`)
 		newButton.style.display = "block"
 		postButton.style.display = "none"
 		newTextBox.style.display = "none"
