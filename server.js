@@ -9,15 +9,16 @@ var express = require('express'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local').Strategy,
 	session = require('express-session'),
-	requireDir = require('require-dir')
+	requireDir = require('require-dir'),
+	bluebirdPromises = require('bluebird')
 
-
+var MongoClient2 = require('mongodb').MongoClient
 // core
 var ensure = require('./core/security/ensure')
 
 // routing separation
 app.use(require('./core/routes/auth'))
-app.use(require('./core/routes/pages'))
+app.use(require('./core/routes/edit'))
 // pages under domain/manage/*.*
 app.use('/manage', require('./core/routes/manage'))
 // var routes = requireDir('./core/routes')
@@ -30,24 +31,44 @@ app.use(bodyParser.json())
 app.use(express.static('public'))
 
 
-
+var connectPromise = require('./core/database')
 
 // init MongoDB
-// TODO: Adjust credentials
+// TODO: move to another file
+// alltogether to avoid lack of
+// data
+
 // init MongoDB
 var db, username, password, collection
 username = "MH15"
 password = "MHall123"
 collection = "franklin-db"
+url = `mongodb://${username}:${password}@ds161901.mlab.com:61901/${collection}`
 
-MongoClient.connect(`mongodb://${username}:${password}@ds161901.mlab.com:61901/${collection}`, (err, database) => {
-	if (err) return console.log(err)
-	db = database
-
-	app.listen(6060, () => {
-		console.log('listening on 6060')
-	})
+MongoClient.connect(url)
+.then(app.listen(6060, () => {
+	console.log('listening on 6060')
+}))
+.then(function (database) { // <- db as first argument
+  console.log("Connected correctly to server method 1");
+  db = database
+	
 })
+.catch(function (err) {
+	throw err;
+})
+
+// console.log(connectPromise);
+connectPromise
+.then((success) => {
+	console.log("Should be second: " + success);
+})
+
+// SUCCESS
+// USE LINES 61 through 65 to build a promise built db connection
+// system in database.js
+
+
 
 // login & security
 passport.use(new LocalStrategy(
@@ -159,9 +180,7 @@ app.get('/manage', ensureAuthenticated, function(req, res) {
 // });
 
 
-app.get('/login', function(req, res) {
-	res.render('login.ejs', {output: null})
-})
+
 
 app.post('/login',
 	passport.authenticate('local', {
