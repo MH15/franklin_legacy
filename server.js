@@ -12,14 +12,16 @@ var express = require('express'),
 	requireDir = require('require-dir')
 
 
-// edit express configuration
-
+// core
+var ensure = require('./core/security/ensure')
 
 // routing separation
-// app.use(require('./core/routes/auth'))
-// app.use(require('./core/routes/pages'))
-var routes = requireDir('./core/routes')
-for (var i in routes) app.use('/', routes[i])
+app.use(require('./core/routes/auth'))
+app.use(require('./core/routes/pages'))
+// pages under domain/manage/*.*
+app.use('/manage', require('./core/routes/manage'))
+// var routes = requireDir('./core/routes')
+// for (var i in routes) app.use('/', routes[i])
 
 // view engine
 app.set('view engine', 'ejs')
@@ -147,6 +149,11 @@ app.get('/', (req, res) => {
 app.get('/edit', ensureAuthenticated, function(req, res, next) {
 	RunSite('edit.ejs', "edit", req, res)
 });
+
+
+app.get('/manage', ensureAuthenticated, function(req, res) {
+	ManageSite('manage.ejs', req, res)
+});
 // app.get('/edit', function(req, res, next) {
 // 	RunSite('edit.ejs', "edit", req, res)
 // });
@@ -215,6 +222,15 @@ passport.use(new LocalStrategy(function(username, password, done) {
 	});
 }));
 
+function ManageSite(source, req, res) {
+	var pageData = {
+		title: source
+	}
+	res.render(source, {
+		pageData: pageData
+	})
+}
+
 function RunSite(source, franklinStyle, req, res) {
 	collection = db.collection('page_content')
 
@@ -266,14 +282,7 @@ function RunSite(source, franklinStyle, req, res) {
 	// console.log(new ObjectID())
 }
 
-function ManageSite(source, req, res) {
-	var pageData = {
-		title: source
-	}
-	res.render(source, {
-		pageData: pageData
-	})
-}
+
 
 // Simple route middleware to ensure user is authenticated.
 //  Use this route middleware on any resource that needs to be protected.  If

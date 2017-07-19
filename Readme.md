@@ -13,6 +13,8 @@ You may have to install some dependencies with the `-g` tag to allow them to be 
 MongoDB should be configured to run through a demo account.
 Run `npm run serve` to watch and serve any changes with a `nodemon` instance.
 
+export NODE_ENV=production
+
 ## TODO:
 This all needs to be done in order of importance:
 1. ~~Support multiple editing spaces~~
