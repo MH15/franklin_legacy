@@ -12,15 +12,15 @@ var express = require('express'),
 	requireDir = require('require-dir'),
 	bluebirdPromises = require('bluebird')
 
-var MongoClient2 = require('mongodb').MongoClient
 // core
-var ensure = require('./core/security/ensure')
+var ensure = require('./core/security/ensure'),
+	manageRouter = require('./core/routes/manage')
 
 // routing separation
 app.use(require('./core/routes/auth'))
 app.use(require('./core/routes/edit'))
 // pages under domain/manage/*.*
-app.use('/manage', require('./core/routes/manage'))
+app.use('/manage', manageRouter.authRouter)
 // var routes = requireDir('./core/routes')
 // for (var i in routes) app.use('/', routes[i])
 
@@ -33,58 +33,23 @@ app.use(express.static('public'))
 
 var connectPromise = require('./core/database')
 
-// init MongoDB
-// TODO: move to another file
-// alltogether to avoid lack of
-// data
-
-// init MongoDB
-var db, username, password, collection
-username = "MH15"
-password = "MHall123"
-collection = "franklin-db"
-url = `mongodb://${username}:${password}@ds161901.mlab.com:61901/${collection}`
-
-MongoClient.connect(url)
+// promise MongoDB
+connectPromise
 .then(app.listen(6060, () => {
 	console.log('listening on 6060')
 }))
-.then(function (database) { // <- db as first argument
-  console.log("Connected correctly to server method 1");
-  db = database
-	
-})
-.catch(function (err) {
-	throw err;
-})
-
-// console.log(connectPromise);
-connectPromise
 .then((success) => {
-	console.log("Should be second: " + success);
+	// console.log(success.collection('page_content'));
+	db = success
+	app.set('database', db)
+})
+.catch(function (error) {
+	throw error;
 })
 
 // SUCCESS
 // USE LINES 61 through 65 to build a promise built db connection
 // system in database.js
-
-
-
-// login & security
-passport.use(new LocalStrategy(
-	function(username, password, done) {
-		User.findOne({ username: username }, function(err, user) {
-			if (err) { return done(err); }
-			if (!user) {
-				return done(null, false, { message: 'Incorrect username.' });
-			}
-			if (!user.validPassword(password)) {
-				return done(null, false, { message: 'Incorrect password.' });
-			}
-			return done(null, user);
-		});
-	}
-));
 
 // add a new item to the database
 app.post('/additem', (req, res) => {
@@ -172,9 +137,9 @@ app.get('/edit', ensureAuthenticated, function(req, res, next) {
 });
 
 
-app.get('/manage', ensureAuthenticated, function(req, res) {
-	ManageSite('manage.ejs', req, res)
-});
+// app.get('/manage', ensureAuthenticated, function(req, res) {
+// 	ManageSite('manage.ejs', req, res)
+// });
 // app.get('/edit', function(req, res, next) {
 // 	RunSite('edit.ejs', "edit", req, res)
 // });

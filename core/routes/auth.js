@@ -1,6 +1,6 @@
 // auth.js
 // ==========
-// authentication routing
+// authentication security & routing
 var MongoClient = require('mongodb').MongoClient,
 	ObjectID = require('mongodb').ObjectID
 var express = require('express'),
@@ -20,6 +20,22 @@ openRouter.use(session({secret: "enter custom sessions secret here"}));
 openRouter.use(passport.initialize()) // Init passport authentication 
 openRouter.use(passport.session()) // persistent login sessions 
 
+
+// login & security
+passport.use(new LocalStrategy(
+	function(username, password, done) {
+		User.findOne({ username: username }, function(err, user) {
+			if (err) { return done(err); }
+			if (!user) {
+				return done(null, false, { message: 'Incorrect username.' });
+			}
+			if (!user.validPassword(password)) {
+				return done(null, false, { message: 'Incorrect password.' });
+			}
+			return done(null, user);
+		});
+	}
+));
 
 
 
