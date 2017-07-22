@@ -16,6 +16,14 @@ var express = require('express'),
 var ensure = require('./core/security/ensure'),
 	manageRouter = require('./core/routes/manage')
 
+
+
+// view engine
+app.set('view engine', 'ejs')
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+app.use(express.static('public'))
+
 // routing separation
 app.use(require('./core/routes/auth'))
 app.use(require('./core/routes/edit'))
@@ -24,11 +32,6 @@ app.use('/manage', manageRouter.authRouter)
 // var routes = requireDir('./core/routes')
 // for (var i in routes) app.use('/', routes[i])
 
-// view engine
-app.set('view engine', 'ejs')
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json())
-app.use(express.static('public'))
 
 
 var connectPromise = require('./core/database')
@@ -47,6 +50,23 @@ connectPromise
 	throw error;
 })
 
+
+// Maybe?
+app.post('/deletepage', (req, res) => {
+	var collection = db.collection("page_list")
+	console.log({pageName: req.body.pageName});
+	collection.remove({pageName: req.body.pageName}, function(err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			console.log("success");
+		}
+	 })
+	res.redirect(req.get('referer'));
+})
+
+
+
 // SUCCESS
 // USE LINES 61 through 65 to build a promise built db connection
 // system in database.js
@@ -62,6 +82,7 @@ app.post('/additem', (req, res) => {
 	res.send('Add Item Success')
 	// TODO: save to db
 })
+
 
 // main stuff
 app.post('/saveuseredits', (req, res) => {
@@ -137,12 +158,6 @@ app.get('/edit', ensureAuthenticated, function(req, res, next) {
 });
 
 
-// app.get('/manage', ensureAuthenticated, function(req, res) {
-// 	ManageSite('manage.ejs', req, res)
-// });
-// app.get('/edit', function(req, res, next) {
-// 	RunSite('edit.ejs', "edit", req, res)
-// });
 
 
 
@@ -163,11 +178,6 @@ app.post('/login',
 
 
 
-app.get('/manage', ensureAuthenticated, function(req, res) {
-	ManageSite('manage.ejs', req, res)
-});
-
-
 
 passport.serializeUser(function(user, done) {
 	done(null, user);
@@ -185,7 +195,6 @@ app.get('/loginFailure', function(req, res, next) {
 
 passport.use(new LocalStrategy(function(username, password, done) {
 	process.nextTick(function() {
-		console.log("working")
 		db.collection('credentials').findOne({
 			'username': username, 
 		}, function(err, user) {
@@ -206,14 +215,7 @@ passport.use(new LocalStrategy(function(username, password, done) {
 	});
 }));
 
-function ManageSite(source, req, res) {
-	var pageData = {
-		title: source
-	}
-	res.render(source, {
-		pageData: pageData
-	})
-}
+
 
 function RunSite(source, franklinStyle, req, res) {
 	collection = db.collection('page_content')
@@ -281,5 +283,5 @@ function ensureAuthenticated(req, res, next) {
 
 //The 404 Route (ALWAYS Keep this as the last route)
 app.get('*', function(req, res){
-	res.send('what???', 404);
+	// res.send('what???', 404);
 });

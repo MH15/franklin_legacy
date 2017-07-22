@@ -103,12 +103,6 @@ function PostNewFranklinItem(zone, text) {
 		console.log('Fetch Error :-S', err)
 	})
 
-	// .then(response => {
-	// 	return response.text
-	// }).then(text => {
-	// 	console.log(text)
-	// })
-
 }
 
 

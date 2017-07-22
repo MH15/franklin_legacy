@@ -16,7 +16,13 @@ var express = require('express'),
 
 // passport login
 // required for passport session
-openRouter.use(session({secret: "enter custom sessions secret here"}));
+openRouter.use(session({
+    secret: "cookie_secret",
+    name: "cookie_name",
+    proxy: true,
+    resave: true,
+    saveUninitialized: true
+}));
 openRouter.use(passport.initialize()) // Init passport authentication 
 openRouter.use(passport.session()) // persistent login sessions 
 
