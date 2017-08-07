@@ -10,7 +10,9 @@ var express = require('express'),
 	LocalStrategy = require('passport-local').Strategy,
 	session = require('express-session'),
 	requireDir = require('require-dir'),
-	bluebirdPromises = require('bluebird')
+	async = require('async'),
+	request = require('request'),
+	http = require('http')
 
 // core
 var ensure = require('./core/security/ensure'),
@@ -25,8 +27,8 @@ app.use(bodyParser.json())
 app.use(express.static('public'))
 
 // routing separation
-app.use(require('./core/routes/auth'))
-app.use(require('./core/routes/edit'))
+app.use(require('./core/routes/auth')) // authentication under root domain
+app.use(require('./core/routes/edit')) // editing of pages
 // pages under domain/manage/*.*
 app.use('/manage', manageRouter.authRouter)
 // var routes = requireDir('./core/routes')
@@ -34,24 +36,107 @@ app.use('/manage', manageRouter.authRouter)
 
 
 
-var connectPromise = require('./core/database')
+var dbComplications = require('./core/database')
 
 // promise MongoDB
-connectPromise
+dbComplications.connectPromise
 .then(app.listen(6060, () => {
 	console.log('listening on 6060')
-}))
-.then((success) => {
+})).then((success) => {
 	// console.log(success.collection('page_content'));
 	db = success
 	app.set('database', db)
-})
-.catch(function (error) {
+	return db
+}).then((db) => {
+	// do a foreach thing to get/post every page in db.collection('page_list')
+	RunAnyPage(db)
+}).catch(function (error) {
 	throw error;
 })
 
 
-// Maybe?
+
+
+// run any page
+function RunAnyPage() {
+	var page_list = db.collection("page_list"),
+			page_content = db.collection("page_content")
+
+
+	// find array of any page in the root dir for starters
+
+	// page_list.find({ }).toArray((err, result) => {
+	// 	var pages = result
+	// 	// var requests = 
+	// })
+	page_list.distinct("pageName", (err, docs) => {
+		// var promises = docs.map(function(pageName) {
+		// 	return new Promise(function(resolve, reject) {
+		// 		// find each of the distinct tags
+		// 		// MongoDB find([name]) of type Array returns array of each query
+		// 		app.get(`/bbb`, (req, res) => {
+		// 			res.send("this was never here... until it was")
+		// 			console.log(pageName);
+		// 		})
+				
+		// 	})
+		function httpGet(url, callback) {
+			const options = {
+				url :  url,
+				text : true
+			};
+			request(options,
+				function(err, res, body) {
+					callback(err, body);
+				}
+			);
+		}
+
+		const urls= [
+  		"http://localhost:6060/test",
+  		"http://localhost:6060/alm/development_tool",
+  		"http://localhost:6060/alm/project_architecture"
+		];
+
+		async.map(urls, httpGet, function (err, res){
+			if (err) return console.log(err);
+			console.log(res);
+			res.send("this was never here... until it was")
+		});
+
+		// Promise.all(promises)
+		// .then(success => {
+		// 	console.log("MESSAGEASKMASLMCLKASMCL");
+		// }).catch(err => {
+		// 	console.log(err);
+		// })
+
+
+	})
+}
+
+		// var promises = distinctZones.map(function(name) {
+		// 	return new Promise(function(resolve, reject) {
+		// 		// find each of the distinct tags
+		// 		// MongoDB find([name]) of type Array returns array of each query
+
+		// 		collection.find({zone: name}).sort({franklinID: 1}).toArray(function(err, result) {
+		// 			if (true) {
+		// 					resolve(result)
+		// 					// console.log(result)
+		// 				}
+		// 				else {
+		// 					reject(Error(err));
+		// 				}
+		// 		})
+		// 	})
+		// })
+
+			// app.get(`/bbb`, (req, res) => {
+			// 	res.send("this was never here")
+			// })
+
+
 app.post('/deletepage', (req, res) => {
 	var collection = db.collection("page_list")
 	console.log({pageName: req.body.pageName});
@@ -59,17 +144,12 @@ app.post('/deletepage', (req, res) => {
 		if (err) {
 			console.log(err);
 		} else {
-			console.log("success");
+			console.log("Page Deleted");
 		}
 	 })
-	res.redirect(req.get('referer'));
+	res.send("Page Deleted")
 })
 
-
-
-// SUCCESS
-// USE LINES 61 through 65 to build a promise built db connection
-// system in database.js
 
 // add a new item to the database
 app.post('/additem', (req, res) => {
@@ -224,7 +304,6 @@ function RunSite(source, franklinStyle, req, res) {
 	// to ejs to avoid mangling the result orders
 	collection.distinct("zone",(function(err, result) {
 		var distinctZones = result
-
 		var promises = distinctZones.map(function(name) {
 			return new Promise(function(resolve, reject) {
 				// find each of the distinct tags

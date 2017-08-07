@@ -58,57 +58,37 @@ authRouter.use('/manage/', function(req, res, next) {
 
 
 
-authRouter.route('/addpage')
-.all((req, res, next) => {
-	next()
-})
-.get((req, res, next) => {
+authRouter.get('/addpage', (req, res) => {
 	// running page
 	console.log("in directory /manage/addpage");
 	runAddPage(req, res)
 })
-.post((req, res, next) => {
+
+authRouter.post('/registernewpage', (req, res, next) => {
 	db = app.get('database')
 	var collection = db.collection('page_list')
+	console.log(req.body);
 	getPages(collection)
 	.then((pages) => {
 		var document = {
 			pageName: req.body.newPageName,
-			order: (pages.length).toString(),
+			template: req.body.template,
+			content: {},
 			timeStamp: new Date().getTime(),
-			user: "Steve"
+			user: req.user.username
 		}
 
 		collection.insertOne(document, function(err, records){
 			console.log("Record added");
 		})
-		runAddPage(req, res)
+		// runAddPage(req, res)
+		res.redirect("/manage/addpage")
 	})
 	.catch((err) => {
 		reject(Error(err))
 	})
 })
 
-
-// authRouter.post('/deletepage', (req, res) => {
-// 	console.log("next 3");
-// 	console.log(req);
-// 	res.send("nah")
-// })
-
-// authRouter.route('/deletepage')
-// .all((req, res, next) => {
-// 	console.log("next 1");
-// 	db = app.get("database")
-// 	collection = db.collection
-// 	next()
-// })
-// .get((req, res, next) => {
-// 	console.log("next 2");
-// 	console.log("ya no mate");
-// 	res.send("ya no mate")
-// 	next()
-// })
 
 
 

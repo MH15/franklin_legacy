@@ -17,7 +17,7 @@ body
 	background: none;
 
 div
-    margin: 20px 0;
+    // margin: 20px 0;
     padding: 5px;
 
 h1, h2, h3, h4, h5, h6
@@ -69,4 +69,50 @@ header
 		height: 20px;
 		margin-top: 5px;
 	
-	#newPage
+#newPage
+	width: 100%;
+	height: auto;
+	border: 1px solid black;
+	margin: 10px;
+	background: #DDD;
+	form
+		margin: 10px;
+		span
+			margin-left: 10px;
+
+.pageTypes
+	padding-top: 15px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	.sample
+		border: 1px solid black;
+		border-radius: 4px;
+		flex: 1;
+		flex-basis: 100px;
+		margin: 5px;
+		flex-shrink: 1;
+		flex-grow: 1;
+		height: auto;
+		padding: 10px;
+		cursor: pointer;
+		.preview
+			background: url("http://lorempixel.com/400/400/city");
+			background-size: cover;
+			height: 150px;
+			border-radius: 3px;
+
+
+// .pageTypes 
+// 	.sample
+// 		background-color:#c5e043;
+// 		display:inline-block;
+// 		width:10px;
+	// 	height:10px
+input[type=radio]
+	display: none
+input[type=radio]:checked + .sample
+	background-color: #f18526
+input[type=radio]:not(:checked) + .sample
+	background-color: #EEE
+

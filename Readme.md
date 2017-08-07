@@ -151,3 +151,37 @@ https://stackoverflow.com/questions/8694346/check-for-existing-document-in-mongo
 ### Git
 https://www.git-tower.com/blog/git-cheat-sheet/
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
+
+
+.post((req, res, next) => {
+  db = app.get('database')
+  var collection = db.collection('page_list')
+  getPages(collection)
+  .then((pages) => {
+    console.log(pages);
+    collection.findOne({pageName: req.body.newPageName}), (err, result) => {
+      if (err) { // if doc doesn't exist error thrown so we add new one
+        var document = {
+          pageName: req.body.newPageName,
+          order: (pages.length).toString(),
+          timeStamp: new Date().getTime(),
+          user: "Steve"
+        }
+
+        collection.insertOne(document, function(err, records){
+          console.log("Page added");
+        })
+        runAddPage(req, res)
+        console.log(err);
+      } else { // doc exists so don't add a duplicate page
+        console.log("page already exists");
+      }
+      
+    }
+    
+  })
+  .catch((err) => {
+    reject(Error(err))
+  })
+})
