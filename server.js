@@ -49,92 +49,65 @@ dbComplications.connectPromise
 	return db
 }).then((db) => {
 	// do a foreach thing to get/post every page in db.collection('page_list')
-	RunAnyPage(db)
+	// RunAnyPage(db)
 }).catch(function (error) {
 	throw error;
 })
 
-
-
+// render any and all site pages
+app.get('/:page_name', function(req, res) {
+	// res.render('page' + req.params.id, { title: 'Express' });
+	FindPage(req, res)
+});
 
 // run any page
-function RunAnyPage() {
+function FindPage(req, res) {
 	var page_list = db.collection("page_list"),
 			page_content = db.collection("page_content")
 
+	if (req.params) {
+		console.log(req.params);
+		var pageName = req.params.page_name
+		page_list.distinct("pageName", (err, docs) => {
+			if (docs.includes(pageName)) {
+				Make(req, res, page_list)
+			} else { 
+				// trigger a 404
+				// TODO: custom 404 page
+				res.status(400);
+				res.send('404: File Not Found');
+			}
+		})
+	}
 
-	// find array of any page in the root dir for starters
-
-	// page_list.find({ }).toArray((err, result) => {
-	// 	var pages = result
-	// 	// var requests = 
-	// })
-	page_list.distinct("pageName", (err, docs) => {
-		// var promises = docs.map(function(pageName) {
-		// 	return new Promise(function(resolve, reject) {
-		// 		// find each of the distinct tags
-		// 		// MongoDB find([name]) of type Array returns array of each query
-		// 		app.get(`/bbb`, (req, res) => {
-		// 			res.send("this was never here... until it was")
-		// 			console.log(pageName);
-		// 		})
-				
-		// 	})
-		function httpGet(url, callback) {
-			const options = {
-				url :  url,
-				text : true
-			};
-			request(options,
-				function(err, res, body) {
-					callback(err, body);
-				}
-			);
-		}
-
-		const urls= [
-  		"http://localhost:6060/test",
-  		"http://localhost:6060/alm/development_tool",
-  		"http://localhost:6060/alm/project_architecture"
-		];
-
-		async.map(urls, httpGet, function (err, res){
-			if (err) return console.log(err);
-			console.log(res);
-			res.send("this was never here... until it was")
-		});
-
-		// Promise.all(promises)
-		// .then(success => {
-		// 	console.log("MESSAGEASKMASLMCLKASMCL");
-		// }).catch(err => {
-		// 	console.log(err);
-		// })
-
-
-	})
 }
 
-		// var promises = distinctZones.map(function(name) {
-		// 	return new Promise(function(resolve, reject) {
-		// 		// find each of the distinct tags
-		// 		// MongoDB find([name]) of type Array returns array of each query
-
-		// 		collection.find({zone: name}).sort({franklinID: 1}).toArray(function(err, result) {
-		// 			if (true) {
-		// 					resolve(result)
-		// 					// console.log(result)
-		// 				}
-		// 				else {
-		// 					reject(Error(err));
-		// 				}
-		// 		})
-		// 	})
-		// })
-
-			// app.get(`/bbb`, (req, res) => {
-			// 	res.send("this was never here")
-			// })
+// generate a page from template and content
+function Make(req, res, pageDB) {
+	var pageName = req.params.page_name
+	pageDB.find({pageName: pageName}).toArray((err, result) => {
+		var template = result[0].template
+		var content = result[0].content
+		var meta = {
+			title: pageName
+		}
+		var data = {
+			content: content
+		}
+		if (content) { // if page is not blank
+			meta.message = "Page is blank! Add content!"
+			res.render(`admin/${template}.ejs`, {
+				meta: meta,
+				data: data
+			})
+		} else {
+			res.render(`admin/${template}.ejs`, {
+				meta: meta,
+				data: data
+			})
+		}
+	})
+}
 
 
 app.post('/deletepage', (req, res) => {
