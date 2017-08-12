@@ -67,19 +67,19 @@ app.post('/registerzone', (req, res) => {
 	pageDB.findOne({pageName: body.pageName}, (err, result) => {
 		var register = result
 
-		if (register.content.length > 0) { // here if zones already exist
-			var length = register.content.length
+		if (register.pageData.length > 0) { // here if zones already exist
+			var length = register.pageData.length
 			console.log(length);
-			register.content[length] = {
+			register.pageData[length] = {
 					title: body.zoneName,
-					content: [] 
+					pageData: [] 
 			}
 			pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
 				console.log("successful POST junk");
 				res.send("abc")
 			})
 		} else { // here if nah mate
-			register.content = [ // add first zone
+			register.pageData = [ // add first zone
 				{
 					title: body.zoneName,
 					content: [] 
@@ -110,22 +110,34 @@ app.post('/registeritem', (req, res) => {
 	pageDB.findOne({pageName: body.pageName}, (err, result) => {
 		var register = result
 
-		if (result.content.length > 0) { // here if zones already exist
-			var lengthA = register.content.length
+		if (result.pageData.length > 0) { // here if zones already exist
+			var lengthA = register.pageData.length
 			console.log(req.body);
-			var index = result.content.findIndex(el => {
+			// find location of zone + content in a pageData instance
+			var index = result.pageData.findIndex(el => {
 				if (el.title === body.zoneName) {
 					return true;
 				}
 			})
-			// console.log(index);
 
-			// register.content[index]
+			if (register.pageData[index].content) { // if zone already has content
+				zoneLength = register.pageData[index].content.length
+				register.pageData[index].content[zoneLength] = req.body.text
+				pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
+					console.log("successful POST junk");
+					res.send("abc")
+				})
+			} else { // if zone is empty
+				register.pageData[index].content = [] // init empty array
+				register.pageData[index].content[0] = req.body.text
+				pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
+					console.log("successful POST junk");
+					res.send("abc")
+				})
+			}
+			register.pageData[index].content
 
-			// pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
-			// 	console.log("successful POST junk");
-			// 	res.send("abc")
-			// })
+	
 		}
 
 	})
@@ -158,16 +170,16 @@ function Make(req, res, pageDB) {
 	var pageName = req.params.page_name
 	pageDB.find({pageName: pageName}).toArray((err, result) => {
 		var template = result[0].template
-		var content = result[0].content
+		var pageData = result[0].pageData
 		var meta = {
 			title: pageName,
 			message: "",
 			phaseScript: "" // optional: edit
 		}
-		var data = content
+		var data = pageData
 		if (true) { // else req.user
 			// logged in
-			if (content) { // if page is not blank
+			if (pageData) { // if page is not blank
 				meta.message = "This page is blank. Add content!"
 				// paramater to feed to edit function
 				// tell editor if content exists
@@ -178,10 +190,10 @@ function Make(req, res, pageDB) {
 			}
 		} else {
 	 //  	// not logged in
-	 //  	if (content) { // if page is not blank
+	 //  	if (pageData) { // if page is not blank
 			// 	meta.message = "This page is blank."
 			// 	// paramater to feed to edit function
-			// 	// tell editor if content exists
+			// 	// tell editor if pageData exists
 			// 	meta.phaseScript = ""
 			// 	render(res, meta, data, template)
 			// } else {

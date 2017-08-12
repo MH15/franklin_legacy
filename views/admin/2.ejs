@@ -1,0 +1,35 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title><%= meta.title %></title>
+
+	<link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/style.min.css">
+</head>
+<body>
+
+<!-- non-editable zone -->
+<header>
+	<h1><%= meta.title %></h1>
+	<h3>using the second template</h3>
+</header>
+
+<p><%= meta.message %></p>
+
+<!-- editable zone -->
+
+
+
+
+
+<%-
+include('../templates/footer.ejs')
+%>
+
+
+<script src="franklin-lib.js"></script>
+
+
+</body>

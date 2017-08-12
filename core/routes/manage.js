@@ -73,7 +73,7 @@ authRouter.post('/registernewpage', (req, res, next) => {
 		var document = {
 			pageName: req.body.newPageName,
 			template: req.body.template,
-			content: [
+			pageData: [
 			],
 			timeStamp: new Date().getTime(),
 			user: req.user.username

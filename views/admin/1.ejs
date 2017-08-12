@@ -1,0 +1,61 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title><%= meta.title %></title>
+
+	<link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/style.min.css">
+	<link rel="shortcut icon" href="">
+
+
+</head>
+<body>
+
+<!-- non-editable zone -->
+<header>
+	<h1><%= meta.title %></h1>
+	<h3>using the first template</h3>
+</header>
+
+<!-- <p class="message"><%= meta.message %></p> -->
+
+<!-- generate zones -->
+<div class="wrapper">
+	<% for(var l = 0; l < data.length; l++) {%>
+		<div class="zone">
+			<h2 class="zoneTitle"><%= data[l].title %></h2>
+			<% for(var c = 0; c < data[l].content.length; c++) { %>
+				<div><%= data[l].content[c] %></div>
+			<% } %>
+
+			<div id="newItemContainer">
+				<div class="message">Add a paragraph</div>
+				<span><input type="textarea" name="itemText" placeholder="item text"></span>
+				<span><button type="submit" class="newBtn">new item</button></span>
+			</div>
+		</div>
+	<% } %>
+
+
+	<!-- zone add template -->
+	<div id="newZoneContainer">
+		<div class="message">Add a zone</div>
+		<span><input type="text" name="zoneName" placeholder="new page name"></span>
+		<span><button type="submit" id="submitButton">Add Zone</button></span>
+	</div>
+</div>
+
+
+
+<%-
+include('../templates/footer.ejs')
+%>
+
+
+<script src="franklin-lib.js"></script>
+<script src="<%=meta.phaseScript%>"></script>
+
+
+</body>

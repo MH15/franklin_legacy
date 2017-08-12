@@ -49,7 +49,7 @@ function FindEditableContent() {
 		var newButton = CreateButton(str.newPostText)
 		newButton.setAttribute("function", "newItem")
 		zone.appendChild(newButton)
-		newButton.addEventListener ("click", function(d) {
+		newButton.addEventListener("click", function(d) {
 			AddFranklinItem(zone)
 		})
 
