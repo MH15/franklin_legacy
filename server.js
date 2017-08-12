@@ -58,7 +58,79 @@ dbComplications.connectPromise
 app.get('/:page_name', function(req, res) {
 	// res.render('page' + req.params.id, { title: 'Express' });
 	FindPage(req, res)
-});
+})
+
+// register a new zone through the ways
+app.post('/registerzone', (req, res) => {
+	var pageDB = db.collection("page_list")
+	var body = req.body
+	pageDB.findOne({pageName: body.pageName}, (err, result) => {
+		var register = result
+
+		if (register.content.length > 0) { // here if zones already exist
+			var length = register.content.length
+			console.log(length);
+			register.content[length] = {
+					title: body.zoneName,
+					content: [] 
+			}
+			pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
+				console.log("successful POST junk");
+				res.send("abc")
+			})
+		} else { // here if nah mate
+			register.content = [ // add first zone
+				{
+					title: body.zoneName,
+					content: [] 
+				}
+			]
+			pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
+				console.log("successful POST junk");
+				res.send("abc")
+			})
+		}
+		// contentToRegister.content
+
+	})
+
+})
+
+function findInArray(element, pageName) {
+			console.log(element.title)
+	if (element.title == pageName) {
+		return true
+	}
+}
+
+// register a new item through the ways
+app.post('/registeritem', (req, res) => {
+	var pageDB = db.collection("page_list")
+	var body = req.body
+	pageDB.findOne({pageName: body.pageName}, (err, result) => {
+		var register = result
+
+		if (result.content.length > 0) { // here if zones already exist
+			var lengthA = register.content.length
+			console.log(req.body);
+			var index = result.content.findIndex(el => {
+				if (el.title === body.zoneName) {
+					return true;
+				}
+			})
+			// console.log(index);
+
+			// register.content[index]
+
+			// pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
+			// 	console.log("successful POST junk");
+			// 	res.send("abc")
+			// })
+		}
+
+	})
+
+})
 
 // run any page
 function FindPage(req, res) {
@@ -66,7 +138,6 @@ function FindPage(req, res) {
 			page_content = db.collection("page_content")
 
 	if (req.params) {
-		console.log(req.params);
 		var pageName = req.params.page_name
 		page_list.distinct("pageName", (err, docs) => {
 			if (docs.includes(pageName)) {
@@ -89,30 +160,48 @@ function Make(req, res, pageDB) {
 		var template = result[0].template
 		var content = result[0].content
 		var meta = {
-			title: pageName
+			title: pageName,
+			message: "",
+			phaseScript: "" // optional: edit
 		}
-		var data = {
-			content: content
-		}
-		if (content) { // if page is not blank
-			meta.message = "Page is blank! Add content!"
-			res.render(`admin/${template}.ejs`, {
-				meta: meta,
-				data: data
-			})
+		var data = content
+		if (true) { // else req.user
+			// logged in
+			if (content) { // if page is not blank
+				meta.message = "This page is blank. Add content!"
+				// paramater to feed to edit function
+				// tell editor if content exists
+				meta.phaseScript = "franklin-edit2.js"
+				render(res, meta, data, template)
+			} else {
+				render(res, meta, data, template)
+			}
 		} else {
-			res.render(`admin/${template}.ejs`, {
-				meta: meta,
-				data: data
-			})
+	 //  	// not logged in
+	 //  	if (content) { // if page is not blank
+			// 	meta.message = "This page is blank."
+			// 	// paramater to feed to edit function
+			// 	// tell editor if content exists
+			// 	meta.phaseScript = ""
+			// 	render(res, meta, data, template)
+			// } else {
+			// 	render(res, meta, data, template)
+			// }
 		}
+		
 	})
 }
 
 
+function render(res, meta, data, template) {
+	res.render(`admin/${template}.ejs`, {
+		meta: meta,
+		data: data
+	})
+}
+
 app.post('/deletepage', (req, res) => {
 	var collection = db.collection("page_list")
-	console.log({pageName: req.body.pageName});
 	collection.remove({pageName: req.body.pageName}, function(err, result) {
 		if (err) {
 			console.log(err);
@@ -128,7 +217,6 @@ app.post('/deletepage', (req, res) => {
 app.post('/additem', (req, res) => {
 	var collection = db.collection('page_content')
 	var document = req.body
-	console.log(req.body);
 	collection.insertOne(document, function(err, records){
 		console.log("Record added");
 	})
@@ -142,7 +230,6 @@ app.post('/saveuseredits', (req, res) => {
 	var collection = db.collection('page_content')
 	var currentID = req.body.franklinID
 	var currentZone = req.body.zone
-	console.log(req.body)
 
 	var newValues = {
 		zone: req.body.zone,
