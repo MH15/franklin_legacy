@@ -27,7 +27,9 @@
 		<div class="zone">
 			<h2 class="zoneTitle"><%= data[l].title %></h2>
 			<% for(var c = 0; c < data[l].content.length; c++) { %>
-				<div><%= data[l].content[c] %></div>
+				<div class="item">
+					<span><%= data[l].content[c] %></span>
+				</div>
 			<% } %>
 
 			<div id="newItemContainer">

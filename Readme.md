@@ -6,6 +6,11 @@ Franklin is a new node-based Content Management System (CMS) built from scratch 
 - MongoDB
 - Some other things
 
+## Manifest
+- Forward Thinking
+- Iteration
+- Objects (less variables)
+
 
 ## Installation
 Run `npm install` to install

@@ -72,7 +72,7 @@ app.post('/registerzone', (req, res) => {
 			console.log(length);
 			register.pageData[length] = {
 					title: body.zoneName,
-					pageData: [] 
+					content: [] 
 			}
 			pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
 				console.log("successful POST junk");
@@ -109,17 +109,14 @@ app.post('/registeritem', (req, res) => {
 	var body = req.body
 	pageDB.findOne({pageName: body.pageName}, (err, result) => {
 		var register = result
-
 		if (result.pageData.length > 0) { // here if zones already exist
 			var lengthA = register.pageData.length
-			console.log(req.body);
 			// find location of zone + content in a pageData instance
 			var index = result.pageData.findIndex(el => {
 				if (el.title === body.zoneName) {
 					return true;
 				}
 			})
-
 			if (register.pageData[index].content) { // if zone already has content
 				zoneLength = register.pageData[index].content.length
 				register.pageData[index].content[zoneLength] = req.body.text
@@ -136,12 +133,27 @@ app.post('/registeritem', (req, res) => {
 				})
 			}
 			register.pageData[index].content
-
-	
 		}
-
 	})
+})
 
+app.post('/deleteitem', (req, res) => {
+	var pageDB = db.collection("page_list")
+	pageDB.findOne({pageName: req.body.pageTitle}, (err, result) => {
+		// no need to check if content exists because deleters won't
+		// show up unless content.length is defined
+		var sectionIndex = result.pageData.findIndex(el => {
+			if (el.title === req.body.section) {
+				return true;
+			}
+		})
+		var itemIndex = result.pageData[sectionIndex].content.findIndex(el => {
+			if (el.title === req.body.matter) {
+				return true;
+			}
+		})
+		var register = // GOOOD ENOUGH FOR TODAY
+	})
 })
 
 // run any page
@@ -177,7 +189,7 @@ function Make(req, res, pageDB) {
 			phaseScript: "" // optional: edit
 		}
 		var data = pageData
-		if (true) { // else req.user
+		if (true) { // if logged in: (req.user)
 			// logged in
 			if (pageData) { // if page is not blank
 				meta.message = "This page is blank. Add content!"
@@ -189,16 +201,16 @@ function Make(req, res, pageDB) {
 				render(res, meta, data, template)
 			}
 		} else {
-	 //  	// not logged in
-	 //  	if (pageData) { // if page is not blank
-			// 	meta.message = "This page is blank."
-			// 	// paramater to feed to edit function
-			// 	// tell editor if pageData exists
-			// 	meta.phaseScript = ""
-			// 	render(res, meta, data, template)
-			// } else {
-			// 	render(res, meta, data, template)
-			// }
+	  	// not logged in
+	  	if (pageData) { // if page is not blank
+				meta.message = "This page is blank."
+				// paramater to feed to edit function
+				// tell editor if pageData exists
+				meta.phaseScript = ""
+				render(res, meta, data, template)
+			} else {
+				render(res, meta, data, template)
+			}
 		}
 		
 	})
