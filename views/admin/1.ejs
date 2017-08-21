@@ -34,8 +34,17 @@
 
 			<div id="newItemContainer">
 				<div class="message">Add a paragraph</div>
-				<span><input type="textarea" name="itemText" placeholder="item text"></span>
-				<span><button type="submit" class="newBtn">new item</button></span>
+				<form class="itemAdder">
+					<span><input type="textarea" name="itemText" placeholder="item text"></span>
+					<span><input type="file" name="imageSrc" placeholder="file"></span>
+					<span><select required>
+						<option value="text" selected>Text</option>
+						<option value="image">Image</option>
+						<option value="markdown">Markdown</option>
+						<option value="html">HTML</option>
+					</select></span>
+					<span><button type="submit" class="newBtn">new item</button></span>
+				</form>
 			</div>
 		</div>
 	<% } %>

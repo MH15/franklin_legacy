@@ -96,12 +96,6 @@ app.post('/registerzone', (req, res) => {
 
 })
 
-function findInArray(element, pageName) {
-			console.log(element.title)
-	if (element.title == pageName) {
-		return true
-	}
-}
 
 // register a new item through the ways
 app.post('/registeritem', (req, res) => {
@@ -143,16 +137,20 @@ app.post('/deleteitem', (req, res) => {
 		// no need to check if content exists because deleters won't
 		// show up unless content.length is defined
 		var sectionIndex = result.pageData.findIndex(el => {
-			if (el.title === req.body.section) {
-				return true;
-			}
+			if (el.title === req.body.section) return true;
 		})
 		var itemIndex = result.pageData[sectionIndex].content.findIndex(el => {
-			if (el.title === req.body.matter) {
-				return true;
-			}
+			if (el === req.body.matter) return true;
 		})
-		var register = // GOOOD ENOUGH FOR TODAY
+		var register = result;
+		if(register.pageData[sectionIndex].content[itemIndex]) {
+			register.pageData[sectionIndex].content.splice(itemIndex, 1)
+		}
+		pageDB.update({pageName: req.body.pageTitle}, register, function(err, result) {
+			console.log("successful DELETE junk");
+			// Make(req.body.pageTitle, req, res, pageDB)
+			res.send("done")
+		})
 	})
 })
 
@@ -165,7 +163,7 @@ function FindPage(req, res) {
 		var pageName = req.params.page_name
 		page_list.distinct("pageName", (err, docs) => {
 			if (docs.includes(pageName)) {
-				Make(req, res, page_list)
+				Make(pageName, req, res, page_list)
 			} else { 
 				// trigger a 404
 				// TODO: custom 404 page
@@ -178,13 +176,12 @@ function FindPage(req, res) {
 }
 
 // generate a page from template and content
-function Make(req, res, pageDB) {
-	var pageName = req.params.page_name
-	pageDB.find({pageName: pageName}).toArray((err, result) => {
+function Make(pageTitle, req, res, pageDB) {
+	pageDB.find({pageName: pageTitle}).toArray((err, result) => {
 		var template = result[0].template
 		var pageData = result[0].pageData
 		var meta = {
-			title: pageName,
+			title: pageTitle,
 			message: "",
 			phaseScript: "" // optional: edit
 		}

@@ -51,7 +51,7 @@ function FindEditableContent() {
 		zone.appendChild(newButton)
 		newButton.addEventListener("click", function(d) {
 			AddFranklinItem(zone)
-		})
+		}, {passive: true})
 
 	})
 }
@@ -68,7 +68,7 @@ function AddFranklinItem(parentZone) {
 		newButton.style.display = "block"
 		postButton.style.display = "none"
 		newTextBox.style.display = "none"
-	})
+	}, {passive: true})
 
 }
 

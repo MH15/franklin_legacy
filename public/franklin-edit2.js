@@ -34,20 +34,65 @@ function AddEditBtns() {
 		PostNewZone(zoneText.value)
 	})
 
+
 	var allZones = document.querySelectorAll('div.zone')
 	allZones.forEach(zone => {
 		// Add a plus button at the bottom of each zone so the user
 		// can add new items. Should popup a box  soon that allows
 		// admin to enter text, images, maps, forms, etc.
+		var form = zone.querySelector("form.itemAdder")
+
 		var newItemContainer = zone.querySelector("div#newItemContainer")
 		newItemContainer.style.display = "block"
 		var newBtn = zone.querySelector("button.newBtn")
 		var text = zone.querySelector("input[name='itemText']")
+		var image = zone.querySelector("input[name='imageSrc']")
 		var zoneTitle = zone.querySelector("h2.zoneTitle").innerHTML
-		newBtn.addEventListener("click", function() {
-			PostNewItem(zoneTitle, text.value)
+
+		text.style.display = "block"
+		image.style.display = "none"
+
+
+
+		var select = form.querySelector("span select")
+		select.addEventListener('change', () => {
+			var current = select.options[select.selectedIndex].value;
+			switch (current) {
+				case "text":
+					text.style.display = "block"
+					image.style.display = "none"
+					break;
+				case "image":
+					text.style.display = "none"
+					image.style.display = "block"
+					break;
+				case "markdown":
+					text.style.display = "block"
+					image.style.display = "none"
+					break;
+				case "html":
+					text.style.display = "block"
+					image.style.display = "none"
+					break;
+			}
 		})
-		// newButton.onclick = () => console.log(zoneTitle);
+
+		form.addEventListener("submit", (event) => {
+			event.preventDefault()
+			// var matter = form.querySelector("span input[name='itemText").value; // first field in form
+			// 	if (matter == "") {
+			// 	return false;
+			// }
+			var contentType = form.querySelector("span select").selectedIndex; // second field
+			if (contentType < 0) { // your first option does not have a value 
+				return false;
+			}
+			PostNewItem(zoneTitle, text.value)
+			console.log("aaa")
+		})
+		// form.onsubmit = (e) => {
+			
+		// }
 	})
 }
 
