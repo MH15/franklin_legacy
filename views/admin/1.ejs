@@ -28,7 +28,7 @@
 			<h2 class="zoneTitle"><%= data[l].title %></h2>
 			<% for(var c = 0; c < data[l].content.length; c++) { %>
 				<div class="item">
-					<span><%= data[l].content[c] %></span>
+					<span><%- data[l].content[c] %></span>
 				</div>
 			<% } %>
 
@@ -36,10 +36,10 @@
 				<div class="message">Add a paragraph</div>
 				<form class="itemAdder">
 					<span><input type="textarea" name="itemText" placeholder="item text"></span>
-					<span><input type="file" name="imageSrc" placeholder="file"></span>
+					<span><input type="file" accept="image/*" name="imageSrc" placeholder="file"></span>
 					<span><select required>
-						<option value="text" selected>Text</option>
-						<option value="image">Image</option>
+						<option value="text">Text</option>
+						<option value="image" selected>Image</option>
 						<option value="markdown">Markdown</option>
 						<option value="html">HTML</option>
 					</select></span>

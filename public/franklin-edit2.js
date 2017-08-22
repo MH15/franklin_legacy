@@ -6,12 +6,12 @@
 // this module is only sent to the client when logged in fyi
 
 Element.prototype.appendBefore = function (element) {
-  element.parentNode.insertBefore(this, element);
+	element.parentNode.insertBefore(this, element);
 },false;
 
 
 Element.prototype.appendAfter = function (element) {
-  element.parentNode.insertBefore(this, element.nextSibling);
+	element.parentNode.insertBefore(this, element.nextSibling);
 },false;
 
 function CoolBeans() {
@@ -49,8 +49,8 @@ function AddEditBtns() {
 		var image = zone.querySelector("input[name='imageSrc']")
 		var zoneTitle = zone.querySelector("h2.zoneTitle").innerHTML
 
-		text.style.display = "block"
-		image.style.display = "none"
+		text.style.display = "none"
+		image.style.display = "block"
 
 
 
@@ -79,6 +79,7 @@ function AddEditBtns() {
 
 		form.addEventListener("submit", (event) => {
 			event.preventDefault()
+			var imageFile = image.files[0];
 			// var matter = form.querySelector("span input[name='itemText").value; // first field in form
 			// 	if (matter == "") {
 			// 	return false;
@@ -87,13 +88,91 @@ function AddEditBtns() {
 			if (contentType < 0) { // your first option does not have a value 
 				return false;
 			}
-			PostNewItem(zoneTitle, text.value)
-			console.log("aaa")
+			PostNewItem(zoneTitle, {text: text.value, image: imageFile}, select.options[select.selectedIndex].value, form)
 		})
-		// form.onsubmit = (e) => {
-			
-		// }
 	})
+}
+class Lib {
+	test(image) {
+		return new Promise((resolve, reject) => {
+			var file = image;
+
+			if (file) {
+				var reader = new FileReader();
+				reader.addEventListener("load", function () {
+					resolve(reader.result)
+				}, false);
+
+				reader.readAsDataURL(file);
+			}
+		})
+		console.log("message");
+	}
+}
+
+var lib = new Lib()
+
+async function PostNewItem(zoneName, matter, select, form) {
+
+	var title = document.querySelector("title").innerHTML
+	var postMatter = null;
+	switch (select) {
+		case "text":
+			postMatter = matter.text
+			break;
+		case "image":
+			// postMatter = matter.image
+			postMatter = await lib.test(matter.image)
+			// postMatter = `<image src="${midMatter}">`
+
+			break;
+		case "markdown":
+			postMatter = matter.text
+			break;
+		case "html":
+			postMatter = matter.text
+			break;
+	}
+
+	var dataToSend = {
+		pageName: title,
+		zoneName: zoneName,
+		matter: {
+			data: postMatter,
+			name: matter.image.name,
+			type: select
+		},
+		timeStamp: new Date().getTime(),
+		user: "Steve"
+
+	}
+	console.log(dataToSend);
+	// console.log(dataToSend);
+
+	var request = new Request('/registeritem', {
+		method: 'POST',
+		body: JSON.stringify(dataToSend),
+		mode: 'cors', 
+		redirect: 'follow',
+		headers: new Headers({
+			'Content-Type': 'application/JSON'
+		})
+	})
+
+	// Now use it!
+
+	fetch(request)
+	.then(function(response) {
+		return response.text();
+	}).then(function(text) { 
+		// when zone confirmation is recieved refresh
+		// the page to update the user interface
+		// location.reload(true)
+	})
+	.catch(function(err) {  
+		console.log('Fetch Error :-S', err)
+	})
+
 }
 
 function DeleteBtns() {
@@ -146,44 +225,6 @@ function DeleteBtns() {
 			})
 		})
 	})
-}
-
-function PostNewItem(zoneName, text) {
-	// trigger.addEventListener('click', () => {
-		var title = document.querySelector("title").innerHTML
-		var dataToSend = {
-			pageName: title,
-			zoneName: zoneName,
-			text: text,
-			timeStamp: new Date().getTime(),
-			user: "Steve"
-
-		}
-
-		var request = new Request('/registeritem', {
-			method: 'POST',
-			body: JSON.stringify(dataToSend),
-			mode: 'cors', 
-			redirect: 'follow',
-			headers: new Headers({
-				'Content-Type': 'application/JSON'
-			})
-		})
-
-		// Now use it!
-		fetch(request)
-		.then(function(response) {
-			return response.text();
-		}).then(function(text) { 
-			// when zone confirmation is recieved refresh
-			// the page to update the user interface
-			location.reload(true)
-		})
-		.catch(function(err) {  
-			console.log('Fetch Error :-S', err)
-		})
-	// })
-
 }
 
 
