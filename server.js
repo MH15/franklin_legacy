@@ -108,19 +108,21 @@ app.post('/registeritem', (req, res) => {
 		// decide which pragma to use to save the data
 		switch (req.body.matter.type) {
 			case "text":
-				postMatter = matter.text
+				Lib.AddItem(req, res, pageDB, result, req.body.matter)
+				.then(() => {
+					res.send("image saved")
+				}).catch(err => {
+					console.log(err);
+				})
 				break;
 			case "image":
 				Lib.SaveImage(req.body.matter.data, req.body.matter.name)
 				.then(src => {
 					// log url to database
-					console.log("image saved")
-					res.send("image saved")
-					var imageDOM = `<img src='${src}'/>`
-					Lib.AddItem(req, res, pageDB, result, imageDOM)
+					console.log(src)
+					var imageDOM = `<img width='200' src='${src}'/>`
+					Lib.AddItem(req, res, pageDB, result, req.body.matter, imageDOM)
 					.then(() => {
-						// log url to database
-						console.log("image saved")
 						res.send("image saved")
 					}).catch(err => {
 						console.log(err);
@@ -144,6 +146,7 @@ app.post('/registeritem', (req, res) => {
 
 app.post('/deleteitem', (req, res) => {
 	var pageDB = db.collection("page_list")
+	// get right page
 	pageDB.findOne({pageName: req.body.pageTitle}, (err, result) => {
 		// no need to check if content exists because deleters won't
 		// show up unless content.length is defined
@@ -151,12 +154,17 @@ app.post('/deleteitem', (req, res) => {
 			if (el.title === req.body.section) return true;
 		})
 		var itemIndex = result.pageData[sectionIndex].content.findIndex(el => {
-			if (el === req.body.matter) return true;
+			if (el.name === req.body.matter.name) return true;
 		})
 		var register = result;
-		if(register.pageData[sectionIndex].content[itemIndex]) {
+		if(register.pageData[sectionIndex].content) {
 			register.pageData[sectionIndex].content.splice(itemIndex, 1)
 		}
+
+
+
+		console.log(`name: ${req.body.matter.name}, itemIndex: ${itemIndex}`);
+
 		pageDB.update({pageName: req.body.pageTitle}, register, function(err, result) {
 			console.log("successful DELETE junk");
 			// Make(req.body.pageTitle, req, res, pageDB)

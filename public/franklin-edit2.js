@@ -115,22 +115,22 @@ var lib = new Lib()
 async function PostNewItem(zoneName, matter, select, form) {
 
 	var title = document.querySelector("title").innerHTML
-	var postMatter = null;
+	var mid = {};
 	switch (select) {
 		case "text":
-			postMatter = matter.text
+			mid.title = matter.text
+			mid.data = matter.text
 			break;
 		case "image":
-			// postMatter = matter.image
-			postMatter = await lib.test(matter.image)
-			// postMatter = `<image src="${midMatter}">`
+			mid.title = matter.image.name
+			mid.data = await lib.test(matter.image)
 
 			break;
 		case "markdown":
-			postMatter = matter.text
+			mid = matter.text
 			break;
 		case "html":
-			postMatter = matter.text
+			mid = matter.text
 			break;
 	}
 
@@ -138,8 +138,8 @@ async function PostNewItem(zoneName, matter, select, form) {
 		pageName: title,
 		zoneName: zoneName,
 		matter: {
-			data: postMatter,
-			name: matter.image.name,
+			data: mid.data,
+			name: mid.title,
 			type: select
 		},
 		timeStamp: new Date().getTime(),
@@ -147,8 +147,6 @@ async function PostNewItem(zoneName, matter, select, form) {
 
 	}
 	console.log(dataToSend);
-	// console.log(dataToSend);
-
 	var request = new Request('/registeritem', {
 		method: 'POST',
 		body: JSON.stringify(dataToSend),
@@ -167,7 +165,7 @@ async function PostNewItem(zoneName, matter, select, form) {
 	}).then(function(text) { 
 		// when zone confirmation is recieved refresh
 		// the page to update the user interface
-		// location.reload(true)
+		location.reload(true)
 	})
 	.catch(function(err) {  
 		console.log('Fetch Error :-S', err)
@@ -181,25 +179,54 @@ function DeleteBtns() {
 		// DOM
 		var deleter = CreateButton('❌')
 		deleter.classList.add("deleter")
-		var span1 = item.querySelector('span')
-		var span2 = document.createElement('span')
-		span2.appendChild(deleter)
-		span2.appendBefore(span1)
-		// meta
-		var meta = {
-			pageTitle: document.querySelector("title").innerHTML,
-			section: item.parentElement.querySelector(".zoneTitle").innerHTML,
-			matter: span1.innerHTML
-		}
+		// var span = item.querySelector('span.data')
+		// var span2 = document.createElement('div')
+		// span2.appendChild(deleter)
+		deleter.appendBefore(item.firstChild)
+		
+		// var name = ""
+		// switch (item.firstChild.nodeName) {
+		// 	case "text":
+		// 		name = ""
+		// 		break;
+		// 	case "image":
+		// 		mid.title = matter.image.text
+		// 		mid.data = await lib.test(matter.image)
+
+		// 		break;
+		// 	case "markdown":
+		// 		mid = matter.text
+		// 		break;
+		// 	case "html":
+		// 		mid = matter.text
+		// 		break;
+		// }
+
 		deleter.addEventListener("click", () => {
+			var type = ""
+			var name = ""
+			var data = ""
+			if (item.lastElementChild.tagName.toLowerCase() == "img") {
+				type = "image"
+				name = (item.querySelector("img").src).split("/images/").pop()
+				data = "hahaha nope"
+			} else {
+				type = "text"
+				name = item.lastElementChild.innerHTML
+				data = "hahaha nope"
+			}
 			var dataToSend = {
-				pageTitle: meta.pageTitle,
-				section: meta.section,
-				matter: meta.matter,
+				pageTitle: document.querySelector("title").innerHTML,
+				section: item.parentElement.querySelector(".zoneTitle").innerHTML,
+				matter: {
+					type: type,
+					name: name,
+					data: data
+				},
 				timeStamp: new Date().getTime(),
 				user: "Steve 2"
 			}
-			console.log(dataToSend);
+			console.log(dataToSend.matter);
 
 			var request = new Request('/deleteitem', {
 				method: 'POST',

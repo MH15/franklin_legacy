@@ -26,9 +26,30 @@
 	<% for(var l = 0; l < data.length; l++) {%>
 		<div class="zone">
 			<h2 class="zoneTitle"><%= data[l].title %></h2>
-			<% for(var c = 0; c < data[l].content.length; c++) { %>
+			<% for(var c = 0; c < data[l].content.length; c++) { 
+				var out = "", type = "" %>
 				<div class="item">
-					<span><%- data[l].content[c] %></span>
+					<%
+					switch(data[l].content[c].type) {
+						case "text":
+						out = `<span>${data[l].content[c].data}</span>`
+						type = "span"
+						break;
+
+					case "image":
+						out = data[l].content[c].data
+						type = "img"
+						break;
+					case "markdown":
+						postMatter = matter.text
+						break;
+					case "html":
+						postMatter = matter.text
+						break;
+					}
+					%>
+
+					<%- out %>
 				</div>
 			<% } %>
 

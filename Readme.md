@@ -10,6 +10,7 @@ Franklin is a new node-based Content Management System (CMS) built from scratch 
 - Forward Thinking
 - Iteration
 - Objects (less variables)
+- Save time
 https://en.wikipedia.org/wiki/Clarke's_three_laws
 
 ## Installation
