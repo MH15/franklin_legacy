@@ -7,7 +7,7 @@
 	<link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="normalize.css">
 	<link rel="stylesheet" type="text/css" href="css/style.min.css">
-	<link rel="shortcut icon" href="">
+	<link rel="shortcut icon" href="favicon.ico">
 
 
 </head>
@@ -32,7 +32,7 @@
 					<%
 					switch(data[l].content[c].type) {
 						case "text":
-						out = `<span>${data[l].content[c].data}</span>`
+						out = `<span name='${data[l].content[c].name}'>${data[l].content[c].data}</span>`
 						type = "span"
 						break;
 
@@ -41,10 +41,10 @@
 						type = "img"
 						break;
 					case "markdown":
-						postMatter = matter.text
+						out = `<span>${data[l].content[c].data}</span>`
 						break;
 					case "html":
-						postMatter = matter.text
+						out = `<span>${data[l].content[c].data}</span>`
 						break;
 					}
 					%>
@@ -59,7 +59,7 @@
 					<span><input type="textarea" name="itemText" placeholder="item text"></span>
 					<span><input type="file" accept="image/*" name="imageSrc" placeholder="file"></span>
 					<span><select required>
-						<option value="text">Text</option>
+						<option value="text">Rich Text</option>
 						<option value="image" selected>Image</option>
 						<option value="markdown">Markdown</option>
 						<option value="html">HTML</option>
@@ -85,7 +85,7 @@
 include('../templates/footer.ejs')
 %>
 
-
+<script src="https://cdn.quilljs.com/1.3.1/quill.js"></script>
 <script src="franklin-lib.js"></script>
 <script src="<%=meta.phaseScript%>"></script>
 

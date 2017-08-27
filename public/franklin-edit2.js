@@ -14,9 +14,12 @@ Element.prototype.appendAfter = function (element) {
 	element.parentNode.insertBefore(this, element.nextSibling);
 },false;
 
+	var TITLE = document.querySelector("title").innerHTML
 function CoolBeans() {
+	var allItems = document.querySelectorAll("div.item")
 	AddEditBtns()
-	DeleteBtns()
+	DeleteBtns(allItems)
+	Editor(allItems)
 }
 
 
@@ -51,8 +54,6 @@ function AddEditBtns() {
 
 		text.style.display = "none"
 		image.style.display = "block"
-
-
 
 		var select = form.querySelector("span select")
 		select.addEventListener('change', () => {
@@ -102,29 +103,32 @@ class Lib {
 				reader.addEventListener("load", function () {
 					resolve(reader.result)
 				}, false);
-
 				reader.readAsDataURL(file);
 			}
 		})
 		console.log("message");
+	}
+	ID() {
+		// Math.random should be unique because of its seeding algorithm.
+		// Convert it to base 36 (numbers + letters), and grab the first 9 characters
+		// after the decimal.
+		return '_' + Math.random().toString(36).substr(2, 9);
 	}
 }
 
 var lib = new Lib()
 
 async function PostNewItem(zoneName, matter, select, form) {
-
 	var title = document.querySelector("title").innerHTML
 	var mid = {};
 	switch (select) {
 		case "text":
-			mid.title = matter.text
+			mid.title = lib.ID()
 			mid.data = matter.text
 			break;
 		case "image":
 			mid.title = matter.image.name
 			mid.data = await lib.test(matter.image)
-
 			break;
 		case "markdown":
 			mid = matter.text
@@ -133,8 +137,8 @@ async function PostNewItem(zoneName, matter, select, form) {
 			mid = matter.text
 			break;
 	}
-
 	var dataToSend = {
+		action: "add",
 		pageName: title,
 		zoneName: zoneName,
 		matter: {
@@ -144,9 +148,7 @@ async function PostNewItem(zoneName, matter, select, form) {
 		},
 		timeStamp: new Date().getTime(),
 		user: "Steve"
-
 	}
-	console.log(dataToSend);
 	var request = new Request('/registeritem', {
 		method: 'POST',
 		body: JSON.stringify(dataToSend),
@@ -156,8 +158,6 @@ async function PostNewItem(zoneName, matter, select, form) {
 			'Content-Type': 'application/JSON'
 		})
 	})
-
-	// Now use it!
 
 	fetch(request)
 	.then(function(response) {
@@ -173,34 +173,12 @@ async function PostNewItem(zoneName, matter, select, form) {
 
 }
 
-function DeleteBtns() {
-	var allItems = document.querySelectorAll("div.item")
+function DeleteBtns(allItems) {
 	allItems.forEach(item => {
 		// DOM
 		var deleter = CreateButton('❌')
 		deleter.classList.add("deleter")
-		// var span = item.querySelector('span.data')
-		// var span2 = document.createElement('div')
-		// span2.appendChild(deleter)
 		deleter.appendBefore(item.firstChild)
-		
-		// var name = ""
-		// switch (item.firstChild.nodeName) {
-		// 	case "text":
-		// 		name = ""
-		// 		break;
-		// 	case "image":
-		// 		mid.title = matter.image.text
-		// 		mid.data = await lib.test(matter.image)
-
-		// 		break;
-		// 	case "markdown":
-		// 		mid = matter.text
-		// 		break;
-		// 	case "html":
-		// 		mid = matter.text
-		// 		break;
-		// }
 
 		deleter.addEventListener("click", () => {
 			var type = ""
@@ -249,6 +227,62 @@ function DeleteBtns() {
 			})
 			.catch(function(err) {  
 				console.log('Fetch Error :-S', err)
+			})
+		})
+	})
+}
+
+function Editor(allItems) {
+	allItems.forEach(item => {
+		// DOM
+		var content = item.lastElementChild
+		content.setAttribute("title", "Click to Edit")
+		content.style.cursor = "pointer"
+		content.addEventListener("click", () => {
+			content.setAttribute("contenteditable", true)
+			content.focus()
+			content.style.cursor = "text"
+				
+
+			// switch back to rendered mode and sync content with server
+			content.addEventListener("focusout", function(d) {
+				// apply changes locally
+				content.setAttribute("contenteditable", false)
+				content.style.cursor = "pointer"
+				var dataToSend = {
+					pageTitle: TITLE,
+					section: item.parentElement.querySelector(".zoneTitle").innerHTML,
+					matter: {
+						type: "text",
+						name: content.getAttribute("name"),
+						data: content.innerHTML
+					}
+				}
+
+				console.log(dataToSend)
+
+				var request = new Request('/edit', {
+					method: 'POST',
+					body: JSON.stringify(dataToSend),
+					mode: 'cors', 
+					redirect: 'follow',
+					headers: new Headers({
+						'Content-Type': 'application/JSON'
+					})
+				})
+
+				// Now use it!
+				fetch(request)
+				.then(function(response) {
+					return response.text();
+				}).then(function(text) { 
+					// when zone confirmation is recieved refresh
+					// the page to update the user interface
+					// location.reload(true)
+				})
+				.catch(function(err) {  
+					console.log('Fetch Error :-S', err)
+				})
 			})
 		})
 	})
