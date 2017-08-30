@@ -11,6 +11,7 @@
 <body>
 
 <!-- non-editable zone -->
+<div class="flex-wrapper">
 <header id="manage-header">
 	<span>
 		<a href="/manage/addpage">Pages</a>
@@ -26,14 +27,16 @@
 	</span>
 </header>
 
-
-
-
+<div id="preview">
+<iframe src="http://localhost:6060/bbb" title="iframe example 1">
+  <p>Your browser does not support iframes.</p>
+</iframe>
+</div>
 
 <%-
 	include('templates/footer.ejs')
 %>
-
+</div>
 
 <script src="franklin-lib.js"></script>
 

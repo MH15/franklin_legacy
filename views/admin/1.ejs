@@ -53,30 +53,20 @@
 				</div>
 			<% } %>
 
-			<div id="newItemContainer">
-				<div class="message">Add a paragraph</div>
-				<form class="itemAdder">
-					<span><input type="textarea" name="itemText" placeholder="item text"></span>
-					<span><input type="file" accept="image/*" name="imageSrc" placeholder="file"></span>
-					<span><select required>
-						<option value="text">Rich Text</option>
-						<option value="image" selected>Image</option>
-						<option value="markdown">Markdown</option>
-						<option value="html">HTML</option>
-					</select></span>
-					<span><button type="submit" class="newBtn">new item</button></span>
-				</form>
-			</div>
+
+			<%-
+			include('../templates/newItemSelector.ejs')
+			%>
+
 		</div>
 	<% } %>
 
 
 	<!-- zone add template -->
-	<div id="newZoneContainer">
-		<div class="message">Add a zone</div>
-		<span><input type="text" name="zoneName" placeholder="new page name"></span>
-		<span><button type="submit" id="submitButton">Add Zone</button></span>
-	</div>
+	<%-
+	include('../templates/newZone.ejs')
+	%>
+
 </div>
 
 

@@ -9,16 +9,20 @@ html
 	margin: 0;
 	padding: 0;
 	border: none;
+	height: 100%;
+	width: 100%;
 
 
 body
 	margin: 0;
 	padding: 0;
 	background: none;
+	height: 100%;
+	width: 100%;
 
 div
     // margin: 20px 0;
-    padding: 5px;
+    // padding: 5px;
 
 h1, h2, h3, h4, h5, h6
 	padding-left: 10px;
@@ -114,16 +118,37 @@ img.image
 			border-radius: 3px;
 
 
-// .pageTypes 
-// 	.sample
-// 		background-color:#c5e043;
-// 		display:inline-block;
-// 		width:10px;
-	// 	height:10px
+// template selector
 input[type=radio]
 	display: none
 input[type=radio]:checked + .sample
 	background-color: #f18526
 input[type=radio]:not(:checked) + .sample
 	background-color: #EEE
+
+div.flex-wrapper
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100%;
+	width: 100%;
+	padding: 0;
+
+	header#manage-header
+		flex-basis: 50px;
+	#preview
+		flex-grow: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		iframe 
+			width: 80%;
+			height: 800px;
+			border-radius: 6px;
+			border: 1px solid gray;
+			box-shadow: 0 1px 5px rgba(0, 0, 0, 0.26);
+
+	footer
+		flex-basis: 50px;
 

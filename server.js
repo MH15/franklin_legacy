@@ -106,7 +106,7 @@ app.post('/registeritem', (req, res) => {
 		// decide which pragma to use to save the data
 		switch (req.body.matter.type) {
 			case "text":
-				Lib.AddItem(req, res, pageDB, result, req.body.matter)
+				Lib.AddItem(req, pageDB, result, req.body.matter)
 				.then(() => {
 					res.send("text done")
 				}).catch(err => {

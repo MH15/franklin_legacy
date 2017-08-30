@@ -17,7 +17,9 @@
 <div id="pageEditor">
 	<% for(var i=0; i< result.length; i++) {%>
 		<div class="page" franklin-page-number="<%=i%>">
-			<span><%= result[i].pageName %></span>
+			<span>
+				<a href="<%=`http://localhost:6060/${result[i].pageName}`%>"><%= result[i].pageName %></a>
+			</span>
 			<button class="right">❌</button>
 			<button class="right">▲</button>
 			<button class="right">▼</button>

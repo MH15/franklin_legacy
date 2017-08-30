@@ -48,7 +48,7 @@ function AddEditBtns() {
 		var newItemContainer = zone.querySelector("div#newItemContainer")
 		newItemContainer.style.display = "block"
 		var newBtn = zone.querySelector("button.newBtn")
-		var text = zone.querySelector("input[name='itemText']")
+		var text = zone.querySelector("div[name='itemText']")
 		var image = zone.querySelector("input[name='imageSrc']")
 		var zoneTitle = zone.querySelector("h2.zoneTitle").innerHTML
 
@@ -89,7 +89,7 @@ function AddEditBtns() {
 			if (contentType < 0) { // your first option does not have a value 
 				return false;
 			}
-			PostNewItem(zoneTitle, {text: text.value, image: imageFile}, select.options[select.selectedIndex].value, form)
+			PostNewItem(zoneTitle, {text: text.innerHTML, image: imageFile}, select.options[select.selectedIndex].value, form)
 		})
 	})
 }
