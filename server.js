@@ -186,6 +186,7 @@ function Make(pageTitle, req, res, pageDB) {
 				// paramater to feed to edit function
 				// tell editor if content exists
 				meta.phaseScript = "franklin-edit2.js"
+				meta.editorTemplate = "editor"
 				render(res, meta, data, template)
 			} else {
 				render(res, meta, data, template)
