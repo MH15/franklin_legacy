@@ -173,6 +173,8 @@ section
 	header
 		max-width: 100%;
 		flex-basis: $header-height;
+		display: flex;
+		justify-content: space-between;
 		border-top-right-radius: $header-border-radius;
 		border-top-left-radius: $header-border-radius;
 		background: #fff;
@@ -181,6 +183,16 @@ section
 		font-weight: bold;
 		font-size: 16px;
 		padding-left: $padding-left;
+
+		i.material-icons.header
+			line-height: 60px;
+			margin-right: 18px
+			cursor: pointer;
+			transition: all 400ms ease;
+
+		i.material-icons.header:hover
+			color: #C62828;
+
 
 	input, div#post
 		max-width: 100%;
@@ -197,7 +209,7 @@ section
 		color: #4b4744;
 		font-weight: 400;
 		font-size: 18px;
-	div#hr 
+	div#hr
 		max-width: 100%;
 		padding-left: $padding-left;
 		padding-right: $padding-left;
@@ -207,7 +219,46 @@ section
 			background: rgba(169, 160, 155, 0.26);
 			height: 1px;
 			margin-top: 0;
+	div#post
+		margin-top: 12px;
 
-	div#tools
+div#tools
+	max-width: 100%;
+	overflow: hidden;
+	padding-left: $padding-left;
+	padding-right: $padding-left;
+
+	
+	#inner
 		max-width: 100%;
-		
+		display: flex;
+		flex-wrap: nowrap;
+		overflow: hidden;
+
+		.function
+			flex-shrink: 0;
+			flex-basis: 50px;
+			display: flex;
+
+			i.material-icons
+				cursor: pointer;
+				margin-left: 2px;
+				margin-right: 2px;
+
+			i.material-icons.show
+				transition: all 400ms ease;
+
+
+			i.material-icons.more
+				margin-left: -1px;
+				margin-right: 7px;
+				transition: all 400ms ease;
+
+			i.material-icons.hidden
+				display: none;
+				// opacity: 0;
+				// transform: scale(0);
+				// transition: all 200ms ease;
+
+div#tools *
+	// border: 1px solid rgba(255, 0, 0, 0.5)
