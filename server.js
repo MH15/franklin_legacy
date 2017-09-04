@@ -97,6 +97,17 @@ app.post('/registerzone', (req, res) => {
 
 })
 
+app.post('/saveimagetodisk', (req, res) => {
+	var pageDB = db.collection("page_list")
+	console.log(req.body.matter);
+	Lib.SaveImageToDisk(req.body.matter.data, req.body.matter.name)
+	.then(src => {
+		res.send(src)
+	}).catch(err => {
+			console.log(err);
+	})
+})
+
 
 // register a new item through the ways
 app.post('/registeritem', (req, res) => {
