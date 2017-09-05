@@ -53,12 +53,21 @@ header.top
 	align-items: center;
 
 // editing stuffs
-div#newZoneContainer, div#newItemContainer
+div#newSectionTools, div#sectionTools
 	display: none
 .deleter
 	margin-right: 15px;
 img.image 
 	
+
+
+div.section
+	border: 1px solid red;
+	.content
+		border: 2px solid green;
+	img
+		max-width: 100%;
+
 
 .message 
 	color: red
@@ -160,7 +169,20 @@ $header-height: 60px;
 $header-border-radius: 10px;
 $padding-left: 25px;
 
-section
+
+div#editView
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: none;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+
+
+section#editor
+	// display: none;
 	display: flex;
 	flex-direction: column;
 	// justify-content: space-between;
@@ -249,6 +271,7 @@ div#post
 	img
 		// all images are full width
 		max-width: 100%;
+		resize: both;
 
 
 // editor toolbar

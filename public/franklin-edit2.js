@@ -25,75 +25,8 @@ function CoolBeans() {
 
 CoolBeans()
 
-// make buttons for things
-function AddEditBtns() {
-	lastZone = document.querySelector("div.wrapper").lastChild
-
-	var newZoneContainer = document.querySelector("div#newZoneContainer")
-	newZoneContainer.style.display = "block"
-	var submitBtn = document.querySelector("button#submitButton")
-	var zoneText = document.querySelector("input[name='zoneName']")
-	submitBtn.addEventListener ("click", function(d) {
-		PostNewZone(zoneText.value)
-	})
-
-
-	var allZones = document.querySelectorAll('div.zone')
-	allZones.forEach(zone => {
-		// Add a plus button at the bottom of each zone so the user
-		// can add new items. Should popup a box  soon that allows
-		// admin to enter text, images, maps, forms, etc.
-		var form = zone.querySelector("form.itemAdder")
-
-		var newItemContainer = zone.querySelector("div#newItemContainer")
-		newItemContainer.style.display = "block"
-		var newBtn = zone.querySelector("button.newBtn")
-		var text = zone.querySelector("div[name='itemText']")
-		var image = zone.querySelector("input[name='imageSrc']")
-		var zoneTitle = zone.querySelector("h2.zoneTitle").innerHTML
-
-		text.style.display = "none"
-		image.style.display = "block"
-
-		var select = form.querySelector("span select")
-		select.addEventListener('change', () => {
-			var current = select.options[select.selectedIndex].value;
-			switch (current) {
-				case "text":
-					text.style.display = "block"
-					image.style.display = "none"
-					break;
-				case "image":
-					text.style.display = "none"
-					image.style.display = "block"
-					break;
-				case "markdown":
-					text.style.display = "block"
-					image.style.display = "none"
-					break;
-				case "html":
-					text.style.display = "block"
-					image.style.display = "none"
-					break;
-			}
-		})
-
-		form.addEventListener("submit", (event) => {
-			event.preventDefault()
-			var imageFile = image.files[0];
-			// var matter = form.querySelector("span input[name='itemText").value; // first field in form
-			// 	if (matter == "") {
-			// 	return false;
-			// }
-			var contentType = form.querySelector("span select").selectedIndex; // second field
-			if (contentType < 0) { // your first option does not have a value 
-				return false;
-			}
-			PostNewItem(zoneTitle, {text: text.innerHTML, image: imageFile}, select.options[select.selectedIndex].value, form)
-		})
-	})
-}
 class Lib {
+
 	test(image) {
 		return new Promise((resolve, reject) => {
 			var file = image;
@@ -117,6 +50,86 @@ class Lib {
 }
 
 var lib = new Lib()
+
+// make buttons for things
+function AddEditBtns() {
+	
+
+	var newSectionTools = document.querySelector("div#newSectionTools")
+	newSectionTools.style.display = "block"
+	var submitBtn = document.querySelector("button#submitButton")
+	var zoneText = document.querySelector("input[name='zoneName']")
+	submitBtn.addEventListener ("click", function(d) {
+		PostNewZone(zoneText.value)
+	})
+
+
+	var allSections = document.querySelectorAll('div.section')
+	var save = document.querySelector('[title="Save"]')
+	var editor = document.querySelector('section#editor')
+	var editView = document.querySelector("div#editView")
+	var title = document.querySelector("title").innerHTML
+	editor.postTitle = editor.querySelector("input#title")
+	editor.content = editor.querySelector("div#post")
+	// VERY IMPORTANT
+	var currentSection = null
+
+
+	allSections.forEach(section => {
+		section.postTitle = section.querySelector("h2.title")
+		section.content = section.querySelector("div.content")
+		section.addEventListener('click', () => {
+			editView.style.display = "flex"
+			editor.postTitle.value = section.postTitle.innerHTML
+			console.log(section)
+			editor.content.innerHTML = section.content.innerHTML
+			currentSection = section
+
+		})
+	})
+
+	save.addEventListener('click', async () => {
+		var newContent = await SaveSection(title, editor, currentSection)
+		currentSection.postTitle.innerHTML = newContent.postTitle.value
+		currentSection.content.innerHTML = newContent.content.innerHTML
+		editView.style.display = "none"
+	})
+
+}
+
+function SaveSection(title, editor, section) {
+	return new Promise((resolve, reject) => {
+		var save = document.querySelector('[title="Save"]')
+		var ToSend = {
+			pageName: title,
+			section: editor.postTitle.value,
+			oldSection: section.postTitle.innerHTML,
+			content: editor.content.innerHTML
+		}
+		var request = new Request('/updateitem', {
+			method: 'POST',
+			body: JSON.stringify(ToSend),
+			mode: 'cors', 
+			redirect: 'follow',
+			headers: new Headers({
+				'Content-Type': 'application/JSON'
+			})
+		})
+
+		fetch(request)
+		.then(function(response) {
+			return response.text();
+		}).then(function(text) { 
+			// update page content once
+			// DB call is complete
+			resolve(editor)
+		})
+		.catch(function(err) {  
+			console.log('Fetch Error :-S', err)
+		})
+	})
+}
+
 
 async function PostNewItem(zoneName, matter, select, form) {
 	var title = document.querySelector("title").innerHTML
@@ -195,7 +208,7 @@ function DeleteBtns(allItems) {
 			}
 			var dataToSend = {
 				pageTitle: document.querySelector("title").innerHTML,
-				section: item.parentElement.querySelector(".zoneTitle").innerHTML,
+				section: item.parentElement.querySelector(".zone .title").innerHTML,
 				matter: {
 					type: type,
 					name: name,
@@ -251,7 +264,7 @@ function Editor(allItems) {
 				content.style.cursor = "pointer"
 				var dataToSend = {
 					pageTitle: TITLE,
-					section: item.parentElement.querySelector(".zoneTitle").innerHTML,
+					section: item.parentElement.querySelector(".zone .title").innerHTML,
 					matter: {
 						type: "text",
 						name: content.getAttribute("name"),

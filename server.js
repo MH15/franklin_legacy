@@ -108,6 +108,16 @@ app.post('/saveimagetodisk', (req, res) => {
 	})
 })
 
+app.post('/updateitem', (req, res) => {
+	var pageDB = db.collection("page_list")
+	Lib.EditItem(pageDB, req)
+	.then(() => {
+		res.send("text done")
+	}).catch(err => {
+		console.log(err);
+	})
+})
+
 
 // register a new item through the ways
 app.post('/registeritem', (req, res) => {
