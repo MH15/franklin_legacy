@@ -62,7 +62,7 @@ app.get('/:page_name', function(req, res) {
 })
 
 // register a new zone through the ways
-app.post('/registerzone', (req, res) => {
+app.post('/postsection', (req, res) => {
 	var pageDB = db.collection("page_list")
 	var body = req.body
 	pageDB.findOne({pageName: body.pageName}, (err, result) => {
@@ -72,7 +72,7 @@ app.post('/registerzone', (req, res) => {
 			var length = register.pageData.length
 			console.log(length);
 			register.pageData[length] = {
-					title: body.zoneName,
+					title: body.section,
 					content: [] 
 			}
 			pageDB.update({pageName: req.body.pageName}, register, function(err, result) {
@@ -82,7 +82,7 @@ app.post('/registerzone', (req, res) => {
 		} else { // here if nah mate
 			register.pageData = [ // add first zone
 				{
-					title: body.zoneName,
+					title: body.section,
 					content: [] 
 				}
 			]
@@ -159,34 +159,7 @@ app.post('/registeritem', (req, res) => {
 		}
 	})
 })
-// edit any item through the ways
-app.post('/edit', (req, res) => {
-	var pageDB = db.collection("page_list")
-	pageDB.findOne({pageName: req.body.pageName}, (err, result) => {
-		// decide which pragma to use to save the data
-		switch (req.body.matter.type) {
-			case "text":
-				Lib.EditItem(req, pageDB, result, req.body.matter)
-				.then(() => {
-					res.send("text edited")
-					console.log(req.body.pageName);
-					// Make(req.body.pageName, req, res, pageDB)
-				}).catch(err => {
-					console.log(err);
-				})
-				break;
-			case "image":
-				// TODO: create other way to edit for images, need to draw this up
-				break;
-			case "markdown":
-				// postMatter = matter.text
-				break;
-			case "html":
-				// postMatter = matter.text
-				break;
-		}
-	})
-})
+
 
 // generate a page from template and content
 function Make(pageTitle, req, res, pageDB) {
@@ -237,7 +210,7 @@ function render(res, meta, data, template) {
 }
 
 
-app.post('/deleteitem', (req, res) => {
+app.post('/deletesection', (req, res) => {
 	var pageDB = db.collection("page_list")
 	// get right page
 	pageDB.findOne({pageName: req.body.pageTitle}, (err, result) => {
@@ -246,12 +219,9 @@ app.post('/deleteitem', (req, res) => {
 		var sectionIndex = result.pageData.findIndex(el => {
 			if (el.title === req.body.section) return true;
 		})
-		var itemIndex = result.pageData[sectionIndex].content.findIndex(el => {
-			if (el.name === req.body.matter.name) return true;
-		})
 		var register = result;
-		if(register.pageData[sectionIndex].content) {
-			register.pageData[sectionIndex].content.splice(itemIndex, 1)
+		if(register.pageData[sectionIndex]) {
+			register.pageData.splice(sectionIndex, 1)
 		}
 
 
@@ -303,42 +273,7 @@ app.post('/deletepage', (req, res) => {
 
 
 
-// main stuff
-app.post('/saveuseredits', (req, res) => {
-	var collection = db.collection('page_content')
-	var currentID = req.body.franklinID
-	var currentZone = req.body.zone
 
-	var newValues = {
-		zone: req.body.zone,
-		franklinID: req.body.franklinID,
-		content: req.body.content,
-		timeStamp: new Date().getTime(),
-		user: "Steve"
-	}
-
-	// check if document already exists
-	// if so, edit document
-	// if not, create document
-	collection.findOne({zone: currentZone, franklinID: currentID}, function(err, document) {
-		if (document) {
-			res.send('MongoDB success')
-			console.log('MongoDB success')
-			collection.update({zone: currentZone, franklinID: currentID}, newValues, function(err, res) {
-				if (err) throw err;
-			});
-
-		} else {
-			res.send('MongoDB failure')
-			console.log("Adding new doc")
-
-			var document = newValues
-			collection.insertOne(document, function(err, records){
-					console.log("Record added");
-			})
-		} 
-	})
-})
 // clean up MongoDB data
 function UpdatePageContent(data) {
 	var numZones = data.length
@@ -435,55 +370,6 @@ passport.use(new LocalStrategy(function(username, password, done) {
 
 
 
-function RunSite(source, franklinStyle, req, res) {
-	collection = db.collection('page_content')
-
-	// make sure to sort content by franklinID before passing
-	// to ejs to avoid mangling the result orders
-	collection.distinct("zone",(function(err, result) {
-		var distinctZones = result
-		var promises = distinctZones.map(function(name) {
-			return new Promise(function(resolve, reject) {
-				// find each of the distinct tags
-				// MongoDB find([name]) of type Array returns array of each query
-
-				collection.find({zone: name}).sort({franklinID: 1}).toArray(function(err, result) {
-					if (true) {
-							resolve(result)
-							// console.log(result)
-						}
-						else {
-							reject(Error(err));
-						}
-				})
-			})
-		})
-		// run all find commands asynchronously
-		Promise.all(promises)
-		.then(function(result) {
-			// send to parser and render EJS
-			var dbContent = UpdatePageContent(result)
-			var pageData = {
-				title: source
-			}
-			var sources = {
-				franklinStyle: DetermineFranklinStyle(franklinStyle)
-			}
-			// console.log(dbContent)
-			res.render("template.ejs", {
-				pageData: pageData,
-				dbContent: dbContent,
-				sources: sources
-			})
-
-		}, function(err) {
-				console.log(err)
-		})
-		.catch(console.error)
-	 }))
-
-	// console.log(new ObjectID())
-}
 
 
 

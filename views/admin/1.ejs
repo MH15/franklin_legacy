@@ -26,13 +26,15 @@
 	<% for(var l = 0; l < data.length; l++) {%>
 
 		<div class="section">
-			<h2 class="title"><%= data[l].title %></h2>
-			<div class="content"><%- data[l].content %></div>
+			<div class="editable">
+				<h2 class="title"><%= data[l].title %></h2>
+				<div class="content"><%- data[l].content %></div>
 
 
-			<% if (data[l].content == null) { %>
-				<%- include('../templates/initSection.ejs') %>
-			<% } %>
+				<% if (data[l].content == null) { %>
+					<%- include('../templates/initSection.ejs') %>
+				<% } %>
+			</div>
 
 		</div>
 	<% } %>

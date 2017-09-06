@@ -18,15 +18,13 @@ Element.prototype.appendAfter = function (element) {
 function CoolBeans() {
 	var allItems = document.querySelectorAll("div.item")
 	AddEditBtns()
-	DeleteBtns(allItems)
-	Editor(allItems)
+	DeleteBtns()
 }
 
 
 CoolBeans()
 
 class Lib {
-
 	test(image) {
 		return new Promise((resolve, reject) => {
 			var file = image;
@@ -53,18 +51,15 @@ var lib = new Lib()
 
 // make buttons for things
 function AddEditBtns() {
-	
-
 	var newSectionTools = document.querySelector("div#newSectionTools")
 	newSectionTools.style.display = "block"
 	var submitBtn = document.querySelector("button#submitButton")
 	var zoneText = document.querySelector("input[name='zoneName']")
 	submitBtn.addEventListener ("click", function(d) {
-		PostNewZone(zoneText.value)
+		PostSection(zoneText.value)
 	})
 
-
-	var allSections = document.querySelectorAll('div.section')
+	var allSections = document.querySelectorAll('div.section .editable')
 	var save = document.querySelector('[title="Save"]')
 	var editor = document.querySelector('section#editor')
 	var editView = document.querySelector("div#editView")
@@ -73,7 +68,6 @@ function AddEditBtns() {
 	editor.content = editor.querySelector("div#post")
 	// VERY IMPORTANT
 	var currentSection = null
-
 
 	allSections.forEach(section => {
 		section.postTitle = section.querySelector("h2.title")
@@ -84,7 +78,6 @@ function AddEditBtns() {
 			console.log(section)
 			editor.content.innerHTML = section.content.innerHTML
 			currentSection = section
-
 		})
 	})
 
@@ -130,106 +123,33 @@ function SaveSection(title, editor, section) {
 	})
 }
 
-
-async function PostNewItem(zoneName, matter, select, form) {
-	var title = document.querySelector("title").innerHTML
-	var mid = {};
-	switch (select) {
-		case "text":
-			mid.title = lib.ID()
-			mid.data = matter.text
-			break;
-		case "image":
-			mid.title = matter.image.name
-			mid.data = await lib.test(matter.image)
-			break;
-		case "markdown":
-			mid = matter.text
-			break;
-		case "html":
-			mid = matter.text
-			break;
-	}
-	var dataToSend = {
-		action: "add",
-		pageName: title,
-		zoneName: zoneName,
-		matter: {
-			data: mid.data,
-			name: mid.title,
-			type: select
-		},
-		timeStamp: new Date().getTime(),
-		user: "Steve"
-	}
-	var request = new Request('/registeritem', {
-		method: 'POST',
-		body: JSON.stringify(dataToSend),
-		mode: 'cors', 
-		redirect: 'follow',
-		headers: new Headers({
-			'Content-Type': 'application/JSON'
-		})
-	})
-
-	fetch(request)
-	.then(function(response) {
-		return response.text();
-	}).then(function(text) { 
-		// when zone confirmation is recieved refresh
-		// the page to update the user interface
-		location.reload(true)
-	})
-	.catch(function(err) {  
-		console.log('Fetch Error :-S', err)
-	})
-
-}
-
-function DeleteBtns(allItems) {
-	allItems.forEach(item => {
+function DeleteBtns() {
+	var sections = document.querySelectorAll("div.section")
+	sections.forEach(item => {
 		// DOM
 		var deleter = CreateButton('❌')
 		deleter.classList.add("deleter")
 		deleter.appendBefore(item.firstChild)
 
 		deleter.addEventListener("click", () => {
-			var type = ""
-			var name = ""
-			var data = ""
-			if (item.lastElementChild.tagName.toLowerCase() == "img") {
-				type = "image"
-				name = (item.querySelector("img").src).split("/images/").pop()
-				data = "hahaha nope"
-			} else {
-				type = "text"
-				name = item.lastElementChild.innerHTML
-				data = "hahaha nope"
-			}
-			var dataToSend = {
+			var sectionTitle = deleter.parentElement.querySelector(".title").innerHTML
+			var ToSend = {
 				pageTitle: document.querySelector("title").innerHTML,
-				section: item.parentElement.querySelector(".zone .title").innerHTML,
-				matter: {
-					type: type,
-					name: name,
-					data: data
-				},
+				section: sectionTitle,
 				timeStamp: new Date().getTime(),
 				user: "Steve 2"
 			}
-			console.log(dataToSend.matter);
 
-			var request = new Request('/deleteitem', {
+			var request = new Request('/deletesection', {
 				method: 'POST',
-				body: JSON.stringify(dataToSend),
+				body: JSON.stringify(ToSend),
 				mode: 'cors', 
 				redirect: 'follow',
 				headers: new Headers({
 					'Content-Type': 'application/JSON'
 				})
 			})
-
-			// Now use it!
+			
 			fetch(request)
 			.then(function(response) {
 				return response.text();
@@ -245,74 +165,17 @@ function DeleteBtns(allItems) {
 	})
 }
 
-function Editor(allItems) {
-	allItems.forEach(item => {
-		// DOM
-		var content = item.lastElementChild
-		content.setAttribute("title", "Click to Edit")
-		content.style.cursor = "pointer"
-		content.addEventListener("click", () => {
-			content.setAttribute("contenteditable", true)
-			content.focus()
-			content.style.cursor = "text"
-				
-
-			// switch back to rendered mode and sync content with server
-			content.addEventListener("focusout", function(d) {
-				// apply changes locally
-				content.setAttribute("contenteditable", false)
-				content.style.cursor = "pointer"
-				var dataToSend = {
-					pageTitle: TITLE,
-					section: item.parentElement.querySelector(".zone .title").innerHTML,
-					matter: {
-						type: "text",
-						name: content.getAttribute("name"),
-						data: content.innerHTML
-					}
-				}
-
-				console.log(dataToSend)
-
-				var request = new Request('/edit', {
-					method: 'POST',
-					body: JSON.stringify(dataToSend),
-					mode: 'cors', 
-					redirect: 'follow',
-					headers: new Headers({
-						'Content-Type': 'application/JSON'
-					})
-				})
-
-				// Now use it!
-				fetch(request)
-				.then(function(response) {
-					return response.text();
-				}).then(function(text) { 
-					// when zone confirmation is recieved refresh
-					// the page to update the user interface
-					// location.reload(true)
-				})
-				.catch(function(err) {  
-					console.log('Fetch Error :-S', err)
-				})
-			})
-		})
-	})
-}
-
-
-function PostNewZone(zoneName) {
+function PostSection(sectionName) {
 	var title = document.querySelector("title").innerHTML
 	var dataToSend = {
 		pageName: title,
-		zoneName: zoneName,
+		section: sectionName,
 		timeStamp: new Date().getTime(),
 		user: "Steve"
 
 	}
 
-	var request = new Request('/registerzone', {
+	var request = new Request('/postsection', {
 		method: 'POST',
 		body: JSON.stringify(dataToSend),
 		mode: 'cors', 
