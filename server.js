@@ -37,7 +37,8 @@ app.use('/manage', manageRouter.authRouter)
 
 
 var dbComplications = require('./core/database')
-var Lib = require('./core/lib/processes')
+var Backend = require('./core/lib/backend')
+var UI = require('./core/lib/ui')
 
 // promise MongoDB
 dbComplications.connectPromise
@@ -56,8 +57,9 @@ dbComplications.connectPromise
 })
 
 // render any and all site pages
-app.get('/:page_name', function(req, res) {
+app.get('/:root_dir?/:sub_dir?', function(req, res) {
 	// res.render('page' + req.params.id, { title: 'Express' });
+	console.log(req.params);
 	FindPage(req, res)
 })
 
@@ -100,7 +102,7 @@ app.post('/postsection', (req, res) => {
 app.post('/saveimagetodisk', (req, res) => {
 	var pageDB = db.collection("page_list")
 	console.log(req.body.matter);
-	Lib.SaveImageToDisk(req.body.matter.data, req.body.matter.name)
+	Backend.SaveImageToDisk(req.body.matter.data, req.body.matter.name)
 	.then(src => {
 		res.send(src)
 	}).catch(err => {
@@ -110,7 +112,7 @@ app.post('/saveimagetodisk', (req, res) => {
 
 app.post('/updateitem', (req, res) => {
 	var pageDB = db.collection("page_list")
-	Lib.EditItem(pageDB, req)
+	Backend.EditItem(pageDB, req)
 	.then(() => {
 		res.send("text done")
 	}).catch(err => {
@@ -127,7 +129,7 @@ app.post('/registeritem', (req, res) => {
 		// decide which pragma to use to save the data
 		switch (req.body.matter.type) {
 			case "text":
-				Lib.AddItem(req, pageDB, result, req.body.matter)
+				Backend.AddItem(req, pageDB, result, req.body.matter)
 				.then(() => {
 					res.send("text done")
 				}).catch(err => {
@@ -135,12 +137,12 @@ app.post('/registeritem', (req, res) => {
 				})
 				break;
 			case "image":
-				Lib.SaveImage(req.body.matter.data, req.body.matter.name)
+				Backend.SaveImage(req.body.matter.data, req.body.matter.name)
 				.then(src => {
 					// log url to database
 					console.log(src)
 					var imageDOM = `<img width='200' src='${src}'/>`
-					Lib.AddItem(req, pageDB, result, req.body.matter, imageDOM)
+					Backend.AddItem(req, pageDB, result, req.body.matter, imageDOM)
 					.then(() => {
 						res.send("image saved")
 					}).catch(err => {
@@ -181,9 +183,9 @@ function Make(pageTitle, req, res, pageDB) {
 				// tell editor if content exists
 				meta.phaseScript = "franklin-edit2.js"
 				meta.editorTemplate = "editor"
-				render(res, meta, data, template)
+				UI.Render(res, meta, data, template)
 			} else {
-				render(res, meta, data, template)
+				UI.Render(res, meta, data, template)
 			}
 		} else {
 	  	// not logged in
@@ -192,23 +194,14 @@ function Make(pageTitle, req, res, pageDB) {
 				// paramater to feed to edit function
 				// tell editor if pageData exists
 				meta.phaseScript = ""
-				render(res, meta, data, template)
+				UI.Render(res, meta, data, template)
 			} else {
-				render(res, meta, data, template)
+				UI.Render(res, meta, data, template)
 			}
 		}
 		
 	})
 }
-
-
-function render(res, meta, data, template) {
-	res.render(`admin/${template}.ejs`, {
-		meta: meta,
-		data: data
-	})
-}
-
 
 app.post('/deletesection', (req, res) => {
 	var pageDB = db.collection("page_list")
@@ -240,19 +233,22 @@ app.post('/deletesection', (req, res) => {
 function FindPage(req, res) {
 	var page_list = db.collection("page_list"),
 			page_content = db.collection("page_content")
-
 	if (req.params) {
-		var pageName = req.params.page_name
-		page_list.distinct("pageName", (err, docs) => {
-			if (docs.includes(pageName)) {
-				Make(pageName, req, res, page_list)
-			} else { 
-				// trigger a 404
-				// TODO: custom 404 page
-				res.status(400);
-				res.send('404: File Not Found');
-			}
-		})
+		var rootDir = req.params.root_dir
+		if (rootDir == undefined) {
+			res.send("a")
+		} else {
+			page_list.distinct("pageName", (err, docs) => {
+				if (docs.includes(rootDir)) {
+					Make(rootDir, req, res, page_list)
+				} else { 
+					// trigger a 404
+					// TODO: custom 404 page
+					res.status(400);
+					res.send('404: File Not Found');
+				}
+			})
+		}
 	}
 
 }
@@ -260,33 +256,16 @@ function FindPage(req, res) {
 
 
 app.post('/deletepage', (req, res) => {
-	var collection = db.collection("page_list")
-	collection.remove({pageName: req.body.pageName}, function(err, result) {
-		if (err) {
-			console.log(err);
-		} else {
-			console.log("Page Deleted");
-		}
-	 })
-	res.send("Page Deleted")
+	var pageDB = db.collection("page_list")
+	console.log(req.body);
+	Backend.DeletePage(pageDB, req.body.title)
+	.then(() => {
+		res.send("page deleted")
+	}).catch(err => {
+		console.log(err);
+	})
 })
 
-
-
-
-// clean up MongoDB data
-function UpdatePageContent(data) {
-	var numZones = data.length
-	var ouputObject = { }
-	for (var i = 0; i < numZones; i++) {
-		var subObjectName = data[i][0].zone
-		ouputObject[subObjectName] = []
-		for (var y = 0; y < data[i].length; y++) {
-			ouputObject[subObjectName][y] = data[i][y]
-		}
-	}
-	return ouputObject
-}
 function DetermineFranklinStyle(franklinStyle) {
 	var style = null
 	switch (franklinStyle) {
@@ -302,19 +281,6 @@ function DetermineFranklinStyle(franklinStyle) {
 	return style
 }
 
-app.get('/', (req, res) => {
-	RunSite('template.ejs', "view", req, res)
-})
-// route to editor if logged in
-app.get('/edit', ensureAuthenticated, function(req, res, next) {
-	RunSite('edit.ejs', "edit", req, res)
-});
-
-
-
-
-
-
 app.post('/login',
 	passport.authenticate('local', {
 		// if login successful route to edit page
@@ -325,11 +291,7 @@ app.post('/login',
 	}), function (req, res) {
 		console.log(req.path);
 	}
-
-// 	})(req, res, next);
 );
-
-
 
 
 passport.serializeUser(function(user, done) {
@@ -367,10 +329,6 @@ passport.use(new LocalStrategy(function(username, password, done) {
 		});
 	});
 }));
-
-
-
-
 
 
 // Simple route middleware to ensure user is authenticated.

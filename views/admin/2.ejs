@@ -14,7 +14,7 @@
 <body>
 
 <!-- non-editable zone -->
-<header>
+<header class="top">
 	<h1><%= meta.title %></h1>
 	<h3>using the second template</h3>
 </header>
@@ -24,39 +24,17 @@
 <!-- generate zones -->
 <div class="wrapper">
 	<% for(var l = 0; l < data.length; l++) {%>
-		<div class="zone">
-			<h2 class="zoneTitle"><%= data[l].title %></h2>
-			<% for(var c = 0; c < data[l].content.length; c++) { 
-				var out = "", type = "" %>
-				<div class="item">
-					<%
-					switch(data[l].content[c].type) {
-						case "text":
-						out = `<span name='${data[l].content[c].name}'>${data[l].content[c].data}</span>`
-						type = "span"
-						break;
 
-					case "image":
-						out = data[l].content[c].data
-						type = "img"
-						break;
-					case "markdown":
-						out = `<span>${data[l].content[c].data}</span>`
-						break;
-					case "html":
-						out = `<span>${data[l].content[c].data}</span>`
-						break;
-					}
-					%>
-
-					<%- out %>
-				</div>
-			<% } %>
+		<div class="section">
+			<div class="editable">
+				<h2 class="title"><%= data[l].title %></h2>
+				<div class="content"><%- data[l].content %></div>
 
 
-			<%-
-			include('../templates/newItemSelector.ejs')
-			%>
+				<% if (data[l].content == null) { %>
+					<%- include('../templates/initSection.ejs') %>
+				<% } %>
+			</div>
 
 		</div>
 	<% } %>
@@ -73,6 +51,10 @@
 
 <%-
 include('../templates/footer.ejs')
+
+%>
+<%-
+include(`../templates/${meta.editorTemplate}.ejs`)
 %>
 
 <script src="https://cdn.quilljs.com/1.3.1/quill.js"></script>

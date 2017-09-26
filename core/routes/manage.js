@@ -60,7 +60,7 @@ authRouter.use('/manage/', function(req, res, next) {
 
 authRouter.get('/addpage', (req, res) => {
 	// running page
-	console.log("in directory /manage/addpage");
+	// console.log("in directory /manage/addpage");
 	runAddPage(req, res)
 })
 

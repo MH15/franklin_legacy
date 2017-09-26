@@ -17,12 +17,12 @@ deletePages.forEach(page => {
 
 function DeletePage(page, order) {
 	var childTitle = page.childNodes
-	var pageTitle = childTitle[1].innerHTML
+	var pageTitle = childTitle[1].querySelector("a").innerHTML
 	// console.log(childTitle);
 	console.log(`deleting item #${order} with title of ${pageTitle}`);
 
 	var docToDelete = {
-		pageName: pageTitle,
+		title: pageTitle,
 		order: order
 	}
 
@@ -35,18 +35,18 @@ function DeletePage(page, order) {
 			'Content-Type': 'application/JSON'
 		})
 	})
-
+	console.log(docToDelete);
 	// Now use it!
 	fetch(request)
 	.then(function(response) {
-    	return response.text();
-  	}).then(function(text) { 
-  	// <!DOCTYPE ....
-  		console.log(text);
-  		// when delete confirmation is recieved refresh
-  		// the page to update the user interface
-  		location.reload(true)
-  	})
+		return response.text();
+	}).then(function(text) { 
+	// <!DOCTYPE ....
+		console.log(text);
+		// when delete confirmation is recieved refresh
+		// the page to update the user interface
+		location.reload(true)
+	})
 	.catch(function(err) {  
 		console.log('Fetch Error :-S', err)
 	})
