@@ -71,12 +71,15 @@ authRouter.post('/registernewpage', (req, res, next) => {
 	getPages(collection)
 	.then((pages) => {
 		var document = {
-			pageName: req.body.newPageName,
+			url: req.body.url,
+			title: req.body.title,
 			template: req.body.template,
 			pageData: [
 			],
-			timeStamp: new Date().getTime(),
-			user: req.user.username
+			history: {
+				timeStamp: new Date().getTime(),
+				user: req.user.username
+			}
 		}
 
 		collection.insertOne(document, function(err, records){

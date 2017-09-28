@@ -5,9 +5,9 @@
 	<title><%= meta.title %></title>
 
 	<link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="normalize.css">
-	<link rel="stylesheet" type="text/css" href="css/style.min.css">
-	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/normalize.css">
+	<link rel="stylesheet" type="text/css" href="/css/style.min.css">
+	<link rel="shortcut icon" href="/favicon.ico">
 
 
 </head>
@@ -16,7 +16,7 @@
 <!-- non-editable zone -->
 <header class="top">
 	<h1><%= meta.title %></h1>
-	<h3>using the second template</h3>
+	<h3>second template</h3>
 </header>
 
 <!-- <p class="message"><%= meta.message %></p> -->
@@ -58,8 +58,8 @@ include(`../templates/${meta.editorTemplate}.ejs`)
 %>
 
 <script src="https://cdn.quilljs.com/1.3.1/quill.js"></script>
-<script src="franklin-lib.js"></script>
-<script src="<%=meta.phaseScript%>"></script>
+<script src="/franklin-lib.js"></script>
+<script src="/<%=meta.phaseScript%>"></script>
 
 
 </body>

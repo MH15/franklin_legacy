@@ -75,7 +75,6 @@ function AddEditBtns() {
 		section.addEventListener('click', () => {
 			editView.style.display = "flex"
 			editor.postTitle.value = section.postTitle.innerHTML
-			console.log(section)
 			editor.content.innerHTML = section.content.innerHTML
 			currentSection = section
 		})
@@ -94,7 +93,7 @@ function SaveSection(title, editor, section) {
 	return new Promise((resolve, reject) => {
 		var save = document.querySelector('[title="Save"]')
 		var ToSend = {
-			pageName: title,
+			url: window.location.pathname,
 			section: editor.postTitle.value,
 			oldSection: section.postTitle.innerHTML,
 			content: editor.content.innerHTML
@@ -134,7 +133,7 @@ function DeleteBtns() {
 		deleter.addEventListener("click", () => {
 			var sectionTitle = deleter.parentElement.querySelector(".title").innerHTML
 			var ToSend = {
-				pageTitle: document.querySelector("title").innerHTML,
+				url: window.location.pathname,
 				section: sectionTitle,
 				timeStamp: new Date().getTime(),
 				user: "Steve 2"
@@ -168,7 +167,7 @@ function DeleteBtns() {
 function PostSection(sectionName) {
 	var title = document.querySelector("title").innerHTML
 	var dataToSend = {
-		pageName: title,
+		url: window.location.pathname,
 		section: sectionName,
 		timeStamp: new Date().getTime(),
 		user: "Steve"

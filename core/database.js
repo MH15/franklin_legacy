@@ -19,16 +19,6 @@ password = "MHall123"
 collection = "franklin-db"
 url = `mongodb://${username}:${password}@ds161901.mlab.com:61901/${collection}`
 
-// MongoClient.connect(url, (err, database) => {
-// 	if (err) return console.log(err)
-//   	assert.equal(null, err);
-//   	console.log("Connected correctly to server 2");
-// 	db = database
-
-// 	// app.listen(6060, () => {
-// 	// 	console.log('listening on 6060')
-// 	// })
-// })
 
 let connectPromise = new Promise((resolve, reject) => {
 	MongoClient.connect(url, (err, database) => {
@@ -36,7 +26,7 @@ let connectPromise = new Promise((resolve, reject) => {
 			reject(Error(err))
 		} else {
 			assert.equal(null, err);
-			console.log("Connected correctly to DB");
+			console.log("PageDB ✓".good);
 			db = database
 
 			resolve(db)
