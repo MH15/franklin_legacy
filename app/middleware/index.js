@@ -1,7 +1,7 @@
 const authRequired = require('./auth')
-const nothingRequired = require('./all')
+const guestRequired = require('./guest')
 
 module.exports = {
   auth: authRequired,
-  all: nothingRequired
+  guest: guestRequired
 }

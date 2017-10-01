@@ -1,0 +1,17 @@
+<% layout('../layouts/main') -%>
+
+<form action="/admin" method="post">
+  <div class="group">
+    <label for="i-username">Username</label>
+    <input type="text" name="username" placeholder="Username" required>
+  </div>
+
+  <div class="group">
+    <label for="i-password">Password</label>
+    <input type="password" name="password" placeholder="Password" required>
+  </div>
+
+  <div class="group">
+    <button type="submit">Sign in</button>
+  </div>
+</form>

@@ -1,3 +1,3 @@
 module.exports = (req, res, next) => {
-  res.redirect('/admin')
+  res.redirect('/signin')
 }
