@@ -34,7 +34,7 @@ gulp.task('sass:min', function() {
 
 // Watch for changes
 gulp.task('watch', function() {
-  gulp.watch('./source/style/**/*.sass', [ 'sass:min' ])
+  gulp.watch('./source/style/*', [ 'sass:min' ])
   // gulp.watch('./source/js/**/*.js', [ 'js:min' ])
 })
 

@@ -60,7 +60,8 @@ function AddEditBtns() {
 	})
 
 	var allSections = document.querySelectorAll('div.section .editable')
-	var save = document.querySelector('[title="Save"]')
+	var saveBtn = document.querySelector('[title="Save"]')
+	var closeBtn = document.querySelector('[title="Close"]')
 	var editor = document.querySelector('section#editor')
 	var editView = document.querySelector("div#editView")
 	var title = document.querySelector("title").innerHTML
@@ -80,10 +81,13 @@ function AddEditBtns() {
 		})
 	})
 
-	save.addEventListener('click', async () => {
+	saveBtn.addEventListener('click', async () => {
 		var newContent = await SaveSection(title, editor, currentSection)
 		currentSection.postTitle.innerHTML = newContent.postTitle.value
 		currentSection.content.innerHTML = newContent.content.innerHTML
+		editView.style.display = "none"
+	})
+	closeBtn.addEventListener('click', async () => {
 		editView.style.display = "none"
 	})
 
