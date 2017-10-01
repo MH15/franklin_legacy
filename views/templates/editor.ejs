@@ -1,0 +1,74 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+			rel="stylesheet">
+
+<div id="editView">
+<section id="editor">
+	<header>
+		<div>New Post</div>
+		<i class="material-icons header" title="Close">clear</i>
+	</header>
+	<input id="title" type="text" name="post_title" placeholder="Post Title">
+	<div id="hr"><hr></div>
+	<div id="tools">
+		<div id="inner">
+			<!-- Format -->
+			<div class="function" id="format">
+				<i class="material-icons show" title="Text">format_color_text</i>
+
+				<select name="select" class="hidden" title="Font Size"> <!--Supplement an id here instead of using 'name'-->
+					<option value="7">h1</option> 
+					<option value="6" selected>h2</option>
+					<option value="5">h3</option> 
+					<option value="4">h4</option>
+					<option value="3">h5</option> 
+					<option value="2">h6</option>
+					<option value="1">h7</option>
+				</select>
+
+				<i class="material-icons hidden" title="Italic">format_italic</i>
+				<i class="material-icons hidden" title="Bold">format_bold</i>
+				<i class="material-icons hidden" title="Underline">format_underlined</i>
+				<i class="material-icons more" title="more">keyboard_arrow_right</i>
+			</div>
+			<!-- Lists -->
+			<div class="function" id="lists">
+				<i class="material-icons show" title="List">list</i>
+				<i class="material-icons hidden" title="Bullet List">format_list_bulleted</i>
+				<i class="material-icons hidden" title="Numbered List">format_list_numbered</i>
+				<i class="material-icons more" title="More">keyboard_arrow_right</i>
+			</div>
+			<!-- Alignment -->
+			<div class="function" id="alignment">
+				<i class="material-icons show" title="Align">format_align_justify</i>
+				<i class="material-icons hidden" title="Align Left">format_align_left</i>
+				<i class="material-icons hidden" title="Align Center">format_align_center</i>
+				<i class="material-icons hidden" title="Align Right">format_align_right</i>
+				<i class="material-icons more" title="More">keyboard_arrow_right</i>
+			</div>
+
+			<!-- Add-in area -->
+			<div class="function" class="attach">
+				<i class="material-icons show" title="Attatch">attach_file</i>
+				<i class="material-icons hidden" title="Photo">add_a_photo</i>
+				<i class="material-icons hidden" title="Link">insert_link</i>
+				<i class="material-icons hidden" title="Map">place</i>
+				<i class="material-icons more" title="More">keyboard_arrow_right</i>
+			</div>
+		</div>
+	</div>
+	<div id="post" contenteditable="true">
+
+	</div>
+
+	<footer>
+		<div>
+			<i class="material-icons header" title="Undo">undo</i>
+			<i class="material-icons header" title="Redo">redo</i>
+		</div>
+		<i class="material-icons header" title="Save">save</i>
+
+	</footer>
+
+</section>
+</div>
+<script type="text/javascript" src="/editor.js"></script>
